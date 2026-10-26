@@ -33,7 +33,8 @@ class Setting extends Model
      */
     public static function current(): self
     {
-        return static::query()->oldest('id')->firstOr(fn () => static::create());
+        // refresh() : relit les valeurs par défaut des colonnes (délai de paiement, TVA…).
+        return static::query()->oldest('id')->firstOr(fn () => static::create()->refresh());
     }
 
     /**

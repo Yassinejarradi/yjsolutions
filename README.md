@@ -3,7 +3,7 @@
 Application web de devis et de facturation pour **JY SOLUTIONS** (SARL, Casablanca).
 Interface en français, montants en dirhams (MAD).
 
-- **Stack** : Laravel 12 (PHP 8.2+), Blade, Livewire 3, Tailwind CSS 3, Pest.
+- **Stack** : Laravel 12 (PHP 8.2+), Blade, Livewire 4, Tailwind CSS 3, Pest.
 - **Base de données** : SQLite en local, MySQL 8 en production.
 - **Plan et décisions** : [docs/PLAN.md](docs/PLAN.md). Le prototype d'origine de l'éditeur est dans [docs/prototype.html](docs/prototype.html).
 

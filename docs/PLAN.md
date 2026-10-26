@@ -22,7 +22,7 @@ Plan validé le 26/10/2026, après réduction du périmètre. Le cahier des char
 
 | Sujet | Décision |
 |---|---|
-| Version | Laravel 12 et Livewire 3 |
+| Version | Laravel 12 et Livewire 4 (composants en classe : `app/Livewire` + `resources/views/livewire`) |
 | Montants | Centimes (BIGINT), calculs avec `brick/math`, arrondi au plus proche (0,5 vers le haut) par ligne puis sur les totaux |
 | TVA | Un seul taux par document (20 % par défaut ; 14, 10, 7 et 0 % possibles) |
 | Remise | Globale, en %, facultative, appliquée avant la TVA |
@@ -35,6 +35,9 @@ Plan validé le 26/10/2026, après réduction du périmètre. Le cahier des char
 | Devis → facture | Possible depuis un devis Envoyé ou Accepté. Le devis passe à Accepté et une facture brouillon est créée |
 | Clients | Un client qui a des documents est archivé, jamais supprimé |
 | Auto-complétion | La désignation d'une ligne propose les lignes déjà saisies (à la place d'un catalogue) |
+| Libellé du devis | « Délai de réalisation » (et non « Délai de livraison » du prototype) : ce sont des prestations de conseil |
+| Délai de paiement | Propre au client s'il est rempli, sinon celui des Paramètres |
+| Clients archivés | Plus proposés pour un nouveau document, mais toujours affichés sur leurs anciens documents |
 
 ## Base de données
 
@@ -67,8 +70,8 @@ Plan validé le 26/10/2026, après réduction du périmètre. Le cahier des char
 
 ## Phases
 
-1. **Base** : projet, connexion, commandes `user:create` et `user:password`, mise en page avec sidebar, Paramètres (société, logo, banque, documents, utilisateurs), cœur de calcul (`Money`, `AmountInWords`, `DocumentCalculator`) et ses tests.
-2. **Clients** : liste avec recherche, fiche, archivage.
+1. **Base** ✅ : projet, connexion, commandes `user:create` et `user:password`, mise en page avec sidebar, Paramètres (société, logo, banque, documents, utilisateurs), cœur de calcul (`Money`, `AmountInWords`, `DocumentCalculator`) et ses tests.
+2. **Clients** ✅ : liste (recherche, filtre Actifs / Archivés, tri par nom), formulaire, fiche (place prête pour devis, factures, total facturé et reste à payer), archivage ; suppression seulement sans document.
 3. **Éditeur et devis** :
    - éditeur visuel A4 en Livewire, repris du prototype ;
    - numérotation, statuts ;

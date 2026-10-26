@@ -8,7 +8,9 @@ Référence : [docs/PLAN.md](docs/PLAN.md) (périmètre validé, phases). Le cah
 
 ## Stack et commandes
 
-Laravel 12, Livewire 3, Blade, Tailwind 3, Pest, brick/math. SQLite en local, MySQL 8 en production.
+Laravel 12, Livewire 4, Blade, Tailwind 3, Pest, brick/math. SQLite en local, MySQL 8 en production.
+Composants Livewire **en classe** (`app/Livewire` + `resources/views/livewire`, réglé dans `config/livewire.php`), pas en fichier unique.
+Après avoir ajouté des classes Tailwind dans une vue : `npm run build`, sinon le CSS publié ne les contient pas.
 
 ```bash
 php artisan serve                          # http://localhost:8000
@@ -44,3 +46,4 @@ Le document A4 s'édite directement à l'écran, sur le modèle de [docs/prototy
 - Travailler phase par phase. À la fin de chaque phase : tests, captures ordinateur et téléphone, commit, push, résumé.
 - Ne pas commencer une phase sans le feu vert de l'utilisateur.
 - Pour arrêter un serveur de test : n'arrêter que le processus lancé soi-même (par son PID), **jamais tous les php.exe**.
+- Captures : base SQLite jetable (variables `DB_CONNECTION`/`DB_DATABASE`), serveur `php -S` lancé **depuis `public/`** avec le routeur `vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php`.

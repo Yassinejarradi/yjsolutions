@@ -1,0 +1,130 @@
+@php
+    use App\Support\Money;
+
+    // Coordonnées affichées seulement si elles sont remplies.
+    $details = collect([
+        'Adresse' => $client->fullAddress(),
+        'ICE' => $client->ice,
+        'IF' => $client->if_number,
+        'RC' => $client->rc,
+        'Contact principal' => $client->contact_name,
+        'Téléphone' => $client->phone,
+        'Email' => $client->email,
+    ])->filter();
+@endphp
+
+<x-app-layout :title="$client->name">
+    <x-slot name="header">
+        <div class="min-w-0">
+            <a href="{{ route('clients.index') }}" class="btn-link">← Tous les clients</a>
+            <h1 class="mt-2 text-3xl font-bold">
+                {{ $client->name }}
+                @if ($client->isArchived())
+                    <span class="ml-2 align-middle rounded bg-desk px-2 py-1 text-base font-semibold text-muted">Archivé</span>
+                @endif
+            </h1>
+        </div>
+        <a href="{{ route('clients.edit', $client) }}" class="btn-primary">Modifier le client</a>
+    </x-slot>
+
+    @if ($client->isArchived())
+        <div class="mb-6 rounded-lg border-l-4 border-muted bg-white px-5 py-4 text-lg">
+            Ce client est archivé depuis le {{ $client->archived_at->format('d/m/Y') }} : il n’est plus proposé pour les nouveaux devis et factures.
+            Ses anciens documents restent consultables.
+        </div>
+    @endif
+
+    {{-- Totaux : calculés à partir des factures en phase 4. --}}
+    <div class="mb-8 grid gap-5 sm:grid-cols-2">
+        <div class="card">
+            <p class="text-lg text-muted">Total facturé</p>
+            <p class="mt-1 text-3xl font-bold tabular-nums">{{ Money::format(0, true) }}</p>
+        </div>
+        <div class="card">
+            <p class="text-lg text-muted">Reste à payer</p>
+            <p class="mt-1 text-3xl font-bold tabular-nums">{{ Money::format(0, true) }}</p>
+        </div>
+    </div>
+
+    <div class="grid gap-8 lg:grid-cols-3">
+        <section class="card lg:col-span-1">
+            <h2 class="card-title">Coordonnées</h2>
+
+            @if ($details->isEmpty())
+                <p class="text-muted">Aucune coordonnée enregistrée.</p>
+            @else
+                <dl class="space-y-3">
+                    @foreach ($details as $label => $value)
+                        <div>
+                            <dt class="text-sm text-muted">{{ $label }}</dt>
+                            <dd class="break-words font-semibold">{{ $value }}</dd>
+                        </div>
+                    @endforeach
+                </dl>
+            @endif
+
+            <div class="mt-5 border-t border-line pt-5">
+                <p class="text-sm text-muted">Délai de paiement</p>
+                <p class="font-semibold">
+                    {{ $client->effectivePaymentTermsDays() }} jours
+                    @if ($client->payment_terms_days === null)
+                        <span class="font-normal text-muted">(délai des Paramètres)</span>
+                    @endif
+                </p>
+            </div>
+
+            @if ($client->notes)
+                <div class="mt-5 border-t border-line pt-5">
+                    <p class="text-sm text-muted">Notes</p>
+                    <p class="whitespace-pre-line">{{ $client->notes }}</p>
+                </div>
+            @endif
+        </section>
+
+        <div class="space-y-8 lg:col-span-2">
+            {{-- Devis du client : phase 3. --}}
+            <section class="card">
+                <h2 class="card-title">Devis</h2>
+                <p class="text-muted">Aucun devis pour ce client.</p>
+            </section>
+
+            {{-- Factures du client : phase 4. --}}
+            <section class="card">
+                <h2 class="card-title">Factures</h2>
+                <p class="text-muted">Aucune facture pour ce client.</p>
+            </section>
+        </div>
+    </div>
+
+    <section class="card mt-8">
+        <h2 class="card-title">Archiver ou supprimer</h2>
+
+        <div class="flex flex-wrap items-center gap-3">
+            @if ($client->isArchived())
+                <form method="POST" action="{{ route('clients.restore', $client) }}">
+                    @csrf
+                    @method('PATCH')
+                    <button type="submit" class="btn-secondary">Réactiver le client</button>
+                </form>
+            @else
+                <form method="POST" action="{{ route('clients.archive', $client) }}"
+                      onsubmit="return confirm(@js('Archiver '.$client->name.' ? Il ne sera plus proposé pour les nouveaux documents.'))">
+                    @csrf
+                    @method('PATCH')
+                    <button type="submit" class="btn-secondary">Archiver le client</button>
+                </form>
+            @endif
+
+            @if ($client->hasDocuments())
+                <p class="text-muted">Ce client a des devis ou des factures : il ne peut pas être supprimé, seulement archivé.</p>
+            @else
+                <form method="POST" action="{{ route('clients.destroy', $client) }}"
+                      onsubmit="return confirm(@js('Supprimer définitivement '.$client->name.' ?'))">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn-danger">Supprimer le client</button>
+                </form>
+            @endif
+        </div>
+    </section>
+</x-app-layout>

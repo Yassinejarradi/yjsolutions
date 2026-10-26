@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Settings\CompanySettingsController;
@@ -15,6 +16,10 @@ Route::get('logo', LogoController::class)->name('logo');
 
 Route::middleware('auth')->group(function () {
     Route::get('tableau-de-bord', DashboardController::class)->name('dashboard');
+
+    Route::resource('clients', ClientController::class);
+    Route::patch('clients/{client}/archiver', [ClientController::class, 'archive'])->name('clients.archive');
+    Route::patch('clients/{client}/reactiver', [ClientController::class, 'restore'])->name('clients.restore');
 
     Route::get('profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');

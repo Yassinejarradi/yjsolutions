@@ -118,5 +118,8 @@ return [
         'quote_payment_terms' => 'modalités de paiement',
         'invoice_notes' => 'mentions des factures',
         'quote_notes' => 'mentions des devis',
+        'city' => 'ville',
+        'contact_name' => 'contact principal',
+        'notes' => 'notes',
     ],
 ];

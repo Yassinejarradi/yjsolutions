@@ -56,3 +56,13 @@ test('un préfixe ne contient que des lettres', function () {
     $this->put('/parametres/documents', documentData(['invoice_prefix' => 'FAC-']))
         ->assertSessionHasErrors('invoice_prefix');
 });
+
+test('les paramètres créés à la volée ont leurs valeurs par défaut', function () {
+    Setting::query()->delete();
+
+    $setting = Setting::current();
+
+    expect($setting->payment_terms_days)->toBe(30)
+        ->and($setting->default_vat_rate)->toBe(20)
+        ->and($setting->invoice_prefix)->toBe('FAC');
+});
