@@ -2,10 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\EditsDocumentLayout;
 use App\Livewire\Concerns\EditsDocumentLines;
 use App\Models\Client;
 use App\Models\Quote;
-use App\Models\Setting;
 use App\Support\AmountInWords;
 use App\Support\DocumentSheet;
 use DateTime;
@@ -24,7 +24,7 @@ use LogicException;
  */
 class QuoteEditor extends Component
 {
-    use EditsDocumentLines;
+    use EditsDocumentLayout, EditsDocumentLines;
 
     public ?int $quoteId = null;
 
@@ -79,6 +79,7 @@ class QuoteEditor extends Component
         $this->savedAt = $quote->exists ? $quote->updated_at->format('H:i') : null;
 
         $this->fillLinesFrom($quote->exists ? $quote->lines : []);
+        $this->fillLayout($quote->resolvedLayout(), $quote->companyDetails());
     }
 
     /**
@@ -126,6 +127,7 @@ class QuoteEditor extends Component
             'payment_terms' => trim($this->paymentTerms),
             'completion_delay' => trim($this->completionDelay),
             'notes' => trim($this->notes) === '' ? null : $this->notes,
+            'layout' => $this->layoutForStorage() ?: null,
         ]);
 
         $created = ! $quote->exists;
@@ -232,14 +234,18 @@ class QuoteEditor extends Component
         $issue = self::parseDate($this->issueDate);
         $until = self::parseDate($this->validUntil);
 
-        return view('livewire.quote-editor', [
+        return view('livewire.quote-editor', $this->layoutViewData() + [
             'totals' => $totals,
             'words' => AmountInWords::fromCents($totals->totalTtc),
             'client' => $this->clientId ? Client::find($this->clientId) : null,
             'clients' => Client::selectable($this->clientId)->get(['id', 'name', 'city', 'ice']),
-            'company' => Setting::current()->toSnapshot(),
             'validityDays' => $issue && $until ? (int) $issue->diffInDays($until, false) : null,
         ]);
+    }
+
+    protected function documentType(): string
+    {
+        return 'quote';
     }
 
     protected function currentDocument(): ?object

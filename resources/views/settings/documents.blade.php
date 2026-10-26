@@ -65,4 +65,29 @@
 
         <button type="submit" class="btn-primary px-8 py-3 text-lg">Enregistrer</button>
     </form>
+
+    <section class="card mt-8">
+        <h2 class="card-title">Mise en page des devis</h2>
+        <p class="-mt-3 mb-4 text-lg">
+            @if (! empty($setting->document_layouts['quote']))
+                <span class="font-semibold text-brand">Personnalisée.</span>
+                Les nouveaux devis reprennent la mise en page enregistrée depuis un devis.
+            @else
+                <span class="font-semibold">D’origine.</span>
+                Les nouveaux devis ont la mise en page du modèle JY Solutions.
+            @endif
+        </p>
+        <p class="mb-5 text-muted">
+            Pour la modifier : ouvrez un devis brouillon, changez le logo, les textes ou les éléments affichés,
+            puis dans « Mise en page » cliquez sur « Utiliser pour les prochains devis ».
+        </p>
+        @if (! empty($setting->document_layouts['quote']))
+            <form method="POST" action="{{ route('settings.documents.layout.reset', 'quote') }}"
+                  onsubmit="return confirm('Revenir à la mise en page d’origine pour les prochains devis ?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn-secondary">Rétablir la mise en page d’origine</button>
+            </form>
+        @endif
+    </section>
 </x-app-layout>

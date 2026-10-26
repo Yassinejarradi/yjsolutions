@@ -38,6 +38,8 @@ Plan validé le 26/10/2026, après réduction du périmètre. Le cahier des char
 | Libellé du devis | « Délai de réalisation » (et non « Délai de livraison » du prototype) : ce sont des prestations de conseil |
 | Délai de paiement | Propre au client s'il est rempli, sinon celui des Paramètres |
 | Clients archivés | Plus proposés pour un nouveau document, mais toujours affichés sur leurs anciens documents |
+| Mise en page modifiable | Tout se modifie sur le document : logo (retirer, remplacer, 3 tailles), tous les textes et libellés, blocs affichés, informations de la société. Rien n'est verrouillé, même sur les factures (choix de l'utilisateur, 26/10/2026) |
+| Modèle de mise en page | Valeurs d'origine ← modèle des Paramètres (« Utiliser pour les prochains devis » depuis l'éditeur) ← changements du document. Un brouillon ne garde que ses différences ; à l'envoi, la mise en page et le logo sont figés dans le document |
 
 ## Base de données
 

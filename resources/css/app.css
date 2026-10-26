@@ -97,16 +97,8 @@
         line-height: 1.35;
     }
 
-    .doc-title {
-        @apply m-0 text-right text-[28px] font-bold tracking-wide text-brand sm:text-[38px];
-    }
-
     .doc-rule {
         @apply my-4 border-0 border-t-2 border-accent;
-    }
-
-    .doc-muted {
-        @apply text-muted;
     }
 
     /* Champ modifiable directement sur la feuille : invisible jusqu'au survol ou au clic. */
@@ -120,9 +112,30 @@
         @apply border-solid border-accent bg-red-50;
     }
 
+    /* Libellé modifiable qui prend la largeur de son texte (navigateurs récents ; sinon largeur fixe). */
+    .doc-input-fit {
+        @apply inline-block w-auto max-w-full;
+        field-sizing: content;
+        min-width: 3ch;
+    }
+
+    /* Libellé modifiable sur le fond bleu (en-têtes du tableau, ligne « Net à payer »). */
+    .doc-input-head {
+        @apply text-white placeholder:text-white/60 hover:border-white/50 focus:border-white focus:bg-white/15;
+    }
+
     textarea.doc-input {
         @apply resize-none overflow-hidden;
         field-sizing: content;
+    }
+
+    /* Après .doc-input : un titre ou un texte grisé modifiable garde sa taille et sa couleur. */
+    .doc-title {
+        @apply m-0 text-right text-[28px] font-bold tracking-wide text-brand sm:text-[38px];
+    }
+
+    .doc-muted {
+        @apply text-muted;
     }
 
     /* Lignes : tableau à partir de md, cartes empilées sur téléphone. */
@@ -139,7 +152,7 @@
         .doc-lines-head,
         .doc-line {
             /* En em : les colonnes suivent la taille du texte de la feuille (15 px), pas celle de l'interface. */
-            grid-template-columns: 2.4em minmax(0, 1fr) 4.4em 6.6em 6.8em 4.3em;
+            grid-template-columns: 2.4em minmax(0, 1fr) 5em 6.6em 6.8em 4.3em;
         }
     }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\QuoteStatus;
 use App\Models\Concerns\HasDocumentLines;
+use App\Support\DocumentLayout;
 use Database\Factories\QuoteFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -60,6 +61,7 @@ class Quote extends Model
             'total_ttc' => 'integer',
             'client_snapshot' => 'array',
             'company_snapshot' => 'array',
+            'layout' => 'array',
             'sent_at' => 'datetime',
             'decided_at' => 'datetime',
         ];
@@ -136,6 +138,7 @@ class Quote extends Model
             }
 
             $setting = Setting::current();
+            $layout = $this->resolvedLayout();
             $year = $this->issue_date->year;
 
             // Les lignes vides ne sont pas gardées dans un document émis.
@@ -147,7 +150,9 @@ class Quote extends Model
                 'status' => QuoteStatus::Sent,
                 'sent_at' => now(),
                 'client_snapshot' => $this->client->toSnapshot(),
-                'company_snapshot' => $setting->toSnapshot(),
+                'company_snapshot' => DocumentLayout::company($layout, $setting->toSnapshot()),
+                // Mise en page complète figée, avec une copie du logo : modifier les Paramètres ne la change plus.
+                'layout' => DocumentLayout::freezeLogo($layout),
             ])->save();
         });
     }
@@ -190,6 +195,7 @@ class Quote extends Model
                 'payment_terms' => $this->payment_terms,
                 'completion_delay' => $this->completion_delay,
                 'notes' => $this->notes,
+                'layout' => DocumentLayout::diff('quote', DocumentLayout::unfreeze($this->resolvedLayout())),
             ]);
             $copy->save();
 
@@ -224,7 +230,20 @@ class Quote extends Model
      */
     public function companyDetails(): array
     {
-        return $this->company_snapshot ?? Setting::current()->toSnapshot();
+        return $this->company_snapshot ?? DocumentLayout::company($this->resolvedLayout(), Setting::current()->toSnapshot());
+    }
+
+    /**
+     * Mise en page complète. Brouillon : origine ← modèle des Paramètres ← changements du devis.
+     * Devis envoyé : celle figée à l'envoi (seulement l'origine pour les devis envoyés avant cette option).
+     */
+    public function resolvedLayout(): array
+    {
+        if ($this->isDraft()) {
+            return DocumentLayout::resolve('quote', $this->layout);
+        }
+
+        return DocumentLayout::sanitize('quote', array_replace_recursive(DocumentLayout::defaults('quote'), $this->layout ?? []));
     }
 
     /**

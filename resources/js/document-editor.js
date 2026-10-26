@@ -18,6 +18,7 @@ export default function registerDocumentEditor(Alpine) {
     Alpine.data('documentAutosave', (delay = 2000) => ({
         state: 'idle',
         version: 0,
+        layoutPanel: false, // panneau « Mise en page »
         timer: null,
 
         init() {

@@ -28,4 +28,19 @@ class DocumentSettingsController extends Controller
 
         return redirect()->route('settings.documents')->with('success', 'Les paramètres des devis et factures ont été enregistrés.');
     }
+
+    /**
+     * Revient à la mise en page d'origine pour un type de document (« quote »).
+     */
+    public function resetLayout(string $type): RedirectResponse
+    {
+        abort_unless(in_array($type, ['quote'], true), 404);
+
+        $setting = Setting::current();
+        $layouts = $setting->document_layouts ?? [];
+        unset($layouts[$type]);
+        $setting->update(['document_layouts' => $layouts ?: null]);
+
+        return redirect()->route('settings.documents')->with('success', 'La mise en page d’origine des devis est rétablie pour les prochains devis.');
+    }
 }

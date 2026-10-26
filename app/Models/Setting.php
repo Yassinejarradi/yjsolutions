@@ -25,6 +25,8 @@ class Setting extends Model
             'default_vat_rate' => 'integer',
             'payment_terms_days' => 'integer',
             'quote_validity_days' => 'integer',
+            // Modèle de mise en page par type de document : ['quote' => [...différences...]]
+            'document_layouts' => 'array',
         ];
     }
 

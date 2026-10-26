@@ -35,7 +35,6 @@
               border-top: 1.5pt solid #E30613; padding-top: 5pt; text-align: center; font-size: 8pt; color: #6B7280; line-height: 1.45; }
     .footer b { color: #0057D0; }
 
-    .head td.logo img { width: 2.4cm; }
     .head td.title { text-align: right; }
     .head h1 { margin: 0; color: #0057D0; font-size: 28pt; letter-spacing: 1.5pt; line-height: 1.1; }
     .head .num { margin-top: 3pt; font-weight: bold; }
@@ -80,23 +79,29 @@
     <div class="watermark">{{ $sheet->watermark }}</div>
 @endif
 
-<div class="footer">
-    <b>{{ $sheet->footerTitle() }}</b>
-    @foreach ($sheet->footerLines() as $line)
-        <br>{{ $line }}
-    @endforeach
-</div>
+@if ($sheet->showFooter)
+    <div class="footer">
+        <b>{{ $sheet->footerTitle() }}</b>
+        @foreach ($sheet->footerLines() as $line)
+            <br>{{ $line }}
+        @endforeach
+    </div>
+@endif
 
 <table class="head">
     <tr>
-        <td class="logo"><img src="{{ $sheet->logoDataUri() }}" alt=""></td>
+        <td class="logo">
+            @if ($sheet->logoPath)<img src="{{ $sheet->logoDataUri() }}" alt="" style="width: {{ $sheet->logoWidthCm }}cm">@endif
+        </td>
         <td class="title">
             <h1>{{ $sheet->title }}</h1>
             @if ($sheet->number)
                 <div class="num">{{ $sheet->numberLabel }} <span>{{ $sheet->number }}</span></div>
             @endif
-            <div class="lab">{{ $sheet->amountLabel }}</div>
-            <div class="big">{{ $sheet->amount }}</div>
+            @if ($sheet->amountLabel !== null)
+                <div class="lab">{{ $sheet->amountLabel }}</div>
+                <div class="big">{{ $sheet->amount }}</div>
+            @endif
         </td>
     </tr>
 </table>
@@ -123,11 +128,11 @@
 <table class="items">
     <thead>
         <tr>
-            <th class="n" style="width: 0.9cm">#</th>
-            <th class="desc">Article &amp; Description</th>
-            <th style="width: 2cm">Quantité</th>
-            <th style="width: 2.8cm">Prix Unitaire</th>
-            <th style="width: 3cm">Montant</th>
+            <th class="n" style="width: 0.9cm">{{ $sheet->columns['number'] }}</th>
+            <th class="desc">{{ $sheet->columns['description'] }}</th>
+            <th style="width: 2cm">{{ $sheet->columns['quantity'] }}</th>
+            <th style="width: 2.8cm">{{ $sheet->columns['unit_price'] }}</th>
+            <th style="width: 3cm">{{ $sheet->columns['amount'] }}</th>
         </tr>
     </thead>
     <tbody>
@@ -156,7 +161,9 @@
     </tr>
 </table>
 
-<p class="words"><b>{{ $sheet->wordsLabel }}</b> <i>{{ $sheet->words }}</i></p>
+@if ($sheet->words !== null)
+    <p class="words"><b>{{ $sheet->wordsLabel }}</b> <i>{{ $sheet->words }}</i></p>
+@endif
 
 <div class="terms">
     @foreach ($sheet->terms as [$label, $text])
@@ -168,11 +175,13 @@
     <div class="notes">{!! nl2br(e($sheet->notes)) !!}</div>
 @endif
 
-<table class="signatures">
-    <tr>
-        <td>@if ($sheet->clientSignature){{ $sheet->clientSignature }}<small>(Date, cachet et signature)</small>@endif</td>
-        <td>{{ $sheet->company['name'] ?? '' }}<small>(Cachet et signature)</small></td>
-    </tr>
-</table>
+@if ($sheet->clientSignature || $sheet->companySignature)
+    <table class="signatures">
+        <tr>
+            <td>@if ($sheet->clientSignature){{ $sheet->clientSignature[0] }}<small>{{ $sheet->clientSignature[1] }}</small>@endif</td>
+            <td>@if ($sheet->companySignature){{ $sheet->companySignature[0] }}<small>{{ $sheet->companySignature[1] }}</small>@endif</td>
+        </tr>
+    </table>
+@endif
 </body>
 </html>

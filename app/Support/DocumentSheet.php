@@ -4,10 +4,10 @@ namespace App\Support;
 
 use App\Models\DocumentLine;
 use App\Models\Quote;
-use App\Models\Setting;
 
 /**
- * Contenu imprimé d'un document, déjà formaté (montants « 12 345,67 », dates JJ/MM/AAAA).
+ * Contenu imprimé d'un document, déjà formaté (montants « 12 345,67 », dates JJ/MM/AAAA)
+ * et mis en page selon sa mise en page (App\Support\DocumentLayout).
  *
  * Une seule source pour l'écran en lecture seule, le PDF et l'export Word :
  * les trois affichent exactement les mêmes textes et les mêmes montants.
@@ -16,30 +16,38 @@ final readonly class DocumentSheet
 {
     /**
      * @param  list<array{0: string, 1: string}>  $dates  [libellé, valeur]
+     * @param  array{number: string, description: string, quantity: string, unit_price: string, amount: string}  $columns
      * @param  list<array{number: int, description: string, quantity: string, unit_price: string, amount: string}>  $lines
      * @param  list<array{0: string, 1: string, 2?: string}>  $totalRows  [libellé, montant, style : '' | 'bold' | 'due']
      * @param  list<array{0: string, 1: string}>  $terms  [libellé, texte]
+     * @param  array{0: string, 1: string}|null  $clientSignature  [titre, mention]
+     * @param  array{0: string, 1: string}|null  $companySignature  [titre, mention]
      * @param  array<string, string>  $company
      */
     public function __construct(
         public string $title,
         public string $numberLabel,
         public ?string $number,
-        public string $amountLabel,
+        public ?string $amountLabel,
         public string $amount,
         public string $clientLabel,
         public array $client,
         public array $dates,
+        public array $columns,
         public array $lines,
         public array $totalRows,
-        public string $wordsLabel,
-        public string $words,
+        public ?string $wordsLabel,
+        public ?string $words,
         public array $terms,
         public ?string $notes,
-        public ?string $clientSignature,
+        public ?array $clientSignature,
+        public ?array $companySignature,
         public array $company,
+        public bool $showFooter,
+        public bool $showPageNumbers,
         public ?string $watermark,
-        public string $logoPath,
+        public ?string $logoPath,
+        public float $logoWidthCm,
         public string $fileName,
         public DocumentTotals $totals,
     ) {}
@@ -47,37 +55,52 @@ final readonly class DocumentSheet
     public static function forQuote(Quote $quote): self
     {
         $quote->loadMissing('lines', 'client');
+        $layout = $quote->resolvedLayout();
+        $label = $layout['labels'];
+        $show = $layout['show'];
+
         $lines = $quote->printableLines();
         $totals = $quote->calculateTotals($lines);
         $validDays = (int) $quote->issue_date->diffInDays($quote->valid_until);
+        $company = $quote->companyDetails();
+
+        $client = $quote->clientDetails();
+        if (! $show['client_ice']) {
+            $client['ice'] = '';
+        }
 
         return new self(
-            title: 'DEVIS',
-            numberLabel: 'N° de devis :',
+            title: $label['title'],
+            numberLabel: $label['number'],
             number: $quote->number,
-            amountLabel: 'Total TTC',
+            amountLabel: $show['amount'] ? $label['amount'] : null,
             amount: Money::format($totals->totalTtc, true),
-            clientLabel: 'Devis établi pour',
-            client: $quote->clientDetails(),
-            dates: [
-                ['Date du devis :', $quote->issue_date->format('d/m/Y')],
-                ['Valable jusqu’au :', $quote->valid_until->format('d/m/Y')],
-                ['Réf. demande :', $quote->reference],
-            ],
+            clientLabel: $label['client'],
+            client: $client,
+            dates: array_values(array_filter([
+                [$label['date'], $quote->issue_date->format('d/m/Y')],
+                [$label['due_date'], $quote->valid_until->format('d/m/Y')],
+                $show['reference'] ? [$label['reference'], $quote->reference] : null,
+            ])),
+            columns: self::columns($label),
             lines: self::formatLines($lines, $totals),
-            totalRows: self::totalRows($totals, 'Net à payer TTC', withTtcRow: false),
-            wordsLabel: 'Arrêté le présent devis à la somme de :',
-            words: AmountInWords::fromCents($totals->totalTtc),
+            totalRows: self::totalRows($totals, $label),
+            wordsLabel: $show['words'] ? $label['words'] : null,
+            words: $show['words'] ? AmountInWords::fromCents($totals->totalTtc) : null,
             terms: array_values(array_filter([
-                ['Validité de l’offre :', $validDays.' jours, jusqu’au '.$quote->valid_until->format('d/m/Y')],
-                ['Modalités de paiement :', $quote->payment_terms],
-                ['Délai de réalisation :', $quote->completion_delay],
-            ], fn (array $term) => trim($term[1]) !== '')),
-            notes: filled($quote->notes) ? $quote->notes : null,
-            clientSignature: 'Bon pour accord – Client',
-            company: $quote->companyDetails(),
+                $show['validity'] ? [$label['validity'], $validDays.' jours, jusqu’au '.$quote->valid_until->format('d/m/Y')] : null,
+                $show['payment_terms'] ? [$label['payment_terms'], $quote->payment_terms] : null,
+                $show['completion_delay'] ? [$label['completion_delay'], $quote->completion_delay] : null,
+            ], fn (?array $term) => $term && trim($term[1]) !== '')),
+            notes: $show['notes'] && filled($quote->notes) ? $quote->notes : null,
+            clientSignature: $show['client_signature'] ? [$label['client_signature'], $label['client_signature_note']] : null,
+            companySignature: $show['company_signature'] ? [self::companySignatureTitle($label, $company), $label['company_signature_note']] : null,
+            company: $company,
+            showFooter: $show['footer'],
+            showPageNumbers: $show['page_numbers'],
             watermark: $quote->isDraft() ? 'BROUILLON' : null,
-            logoPath: Setting::current()->logoFilePath(),
+            logoPath: DocumentLayout::logoFile($layout),
+            logoWidthCm: DocumentLayout::logoWidthCm($layout),
             fileName: $quote->fileName(),
             totals: $totals,
         );
@@ -86,11 +109,23 @@ final readonly class DocumentSheet
     /**
      * Logo en data URI (pour dompdf, sans accès au système de fichiers depuis le HTML).
      */
-    public function logoDataUri(): string
+    public function logoDataUri(): ?string
     {
+        if ($this->logoPath === null) {
+            return null;
+        }
+
         $mime = mime_content_type($this->logoPath) ?: 'image/png';
 
         return 'data:'.$mime.';base64,'.base64_encode((string) file_get_contents($this->logoPath));
+    }
+
+    /**
+     * Largeur du logo à l'écran, en pixels (la feuille fait 210 mm ≈ 794 px).
+     */
+    public function logoWidthPx(): int
+    {
+        return (int) round($this->logoWidthCm * 37.8);
     }
 
     /**
@@ -133,6 +168,23 @@ final readonly class DocumentSheet
         return collect([$c['name'] ?? '', $c['address'] ?? ''])->filter()->implode(' – ');
     }
 
+    /** Titre de la signature de la société : le texte saisi, sinon la raison sociale. */
+    public static function companySignatureTitle(array $labels, array $company): string
+    {
+        return $labels['company_signature'] !== '' ? $labels['company_signature'] : ($company['name'] ?? '');
+    }
+
+    public static function columns(array $labels): array
+    {
+        return [
+            'number' => $labels['col_number'],
+            'description' => $labels['col_description'],
+            'quantity' => $labels['col_quantity'],
+            'unit_price' => $labels['col_unit_price'],
+            'amount' => $labels['col_amount'],
+        ];
+    }
+
     private static function formatLines($lines, DocumentTotals $totals): array
     {
         return $lines->values()->map(fn (DocumentLine $line, int $i) => [
@@ -146,24 +198,25 @@ final readonly class DocumentSheet
 
     /**
      * Lignes du bloc des totaux. Avec une remise : Sous-total, Remise, puis Total HT.
+     * Le taux est ajouté aux libellés « Remise » et « TVA » : « TVA (20 %) ».
      */
-    public static function totalRows(DocumentTotals $totals, string $dueLabel, bool $withTtcRow): array
+    public static function totalRows(DocumentTotals $totals, array $labels, ?string $ttcLabel = null): array
     {
         $rows = [];
 
         if ($totals->hasDiscount()) {
-            $rows[] = ['Sous-total', Money::format($totals->subtotal)];
-            $rows[] = ['Remise ('.self::percent($totals->discountPercent).' %)', '-'.Money::format($totals->discount)];
+            $rows[] = [$labels['subtotal'], Money::format($totals->subtotal)];
+            $rows[] = [trim($labels['discount'].' ('.self::percent($totals->discountPercent).' %)'), '-'.Money::format($totals->discount)];
         }
 
-        $rows[] = ['Total HT', Money::format($totals->totalHt)];
-        $rows[] = ['TVA ('.$totals->vatRate.' %)', Money::format($totals->vat)];
+        $rows[] = [$labels['total_ht'], Money::format($totals->totalHt)];
+        $rows[] = [trim($labels['vat'].' ('.$totals->vatRate.' %)'), Money::format($totals->vat)];
 
-        if ($withTtcRow) {
-            $rows[] = ['Total TTC', Money::format($totals->totalTtc, true), 'bold'];
+        if ($ttcLabel !== null) {
+            $rows[] = [$ttcLabel, Money::format($totals->totalTtc, true), 'bold'];
         }
 
-        $rows[] = [$dueLabel, Money::format($totals->totalTtc, true), 'due'];
+        $rows[] = [$labels['due'], Money::format($totals->totalTtc, true), 'due'];
 
         return $rows;
     }

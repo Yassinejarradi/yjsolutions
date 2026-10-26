@@ -35,6 +35,7 @@ Le document A4 s'édite directement à l'écran, sur le modèle de [docs/prototy
 
 - Lignes, calculs, auto-complétion : trait `App\Livewire\Concerns\EditsDocumentLines` (à réutiliser pour les factures) ; JS Alpine dans `resources/js/document-editor.js`.
 - Écran en lecture, PDF et Word lisent tous `App\Support\DocumentSheet` : ne jamais formater un montant ailleurs.
+- Mise en page (logo, textes, blocs, société) : `App\Support\DocumentLayout` + trait `EditsDocumentLayout` + panneau `livewire/partials/layout-panel`. Tout nouveau texte imprimé doit passer par `labels`, sinon il n'est pas modifiable.
 - Les lignes ont `wire:key` = clé + position : sinon, après un déplacement, les champs liés par position affichent l'ancienne valeur.
 - PhpWord : échappement activé et largeurs en twips entiers, sinon Word refuse d'ouvrir le fichier.
 
@@ -53,4 +54,5 @@ Le document A4 s'édite directement à l'écran, sur le modèle de [docs/prototy
 - Pour arrêter un serveur de test : n'arrêter que le processus lancé soi-même (par son PID), **jamais tous les php.exe**.
 - Captures : base SQLite jetable (variables `DB_CONNECTION`/`DB_DATABASE`), serveur `php -S` lancé **depuis `public/`** avec le routeur `vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php`. Captures ordinateur, tablette et téléphone.
 - `php artisan tinker fichier.php` attend une saisie : toujours ajouter `< /dev/null`.
+- `npm run build` peut rester bloqué s'il est interrompu : vérifier les `node.exe`/`esbuild.exe` restants et n'arrêter que les siens (par PID). `node node_modules/vite/bin/vite.js build` évite l'enveloppe npm.
 - Vérifier un .docx en l'ouvrant avec Word (COM PowerShell `Word.Application`, puis `Quit()`).

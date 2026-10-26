@@ -72,9 +72,11 @@ class DocumentWord
         self::addLines($section, $sheet);
         self::addTotals($section, $sheet);
 
-        $words = $section->addTextRun(['spaceBefore' => self::pt(14), 'spaceAfter' => self::pt(8)]);
-        $words->addText($sheet->wordsLabel.' ', ['bold' => true]);
-        $words->addText($sheet->words, ['italic' => true, 'color' => self::MUTED]);
+        if ($sheet->words !== null) {
+            $words = $section->addTextRun(['spaceBefore' => self::pt(14), 'spaceAfter' => self::pt(8)]);
+            $words->addText($sheet->wordsLabel.' ', ['bold' => true]);
+            $words->addText($sheet->words, ['italic' => true, 'color' => self::MUTED]);
+        }
 
         foreach ($sheet->terms as [$label, $text]) {
             $run = $section->addTextRun(['spaceAfter' => self::pt(2)]);
@@ -86,7 +88,12 @@ class DocumentWord
             self::addMultiline($section->addTextRun(['spaceBefore' => self::pt(10)]), $sheet->notes, ['size' => 9, 'color' => self::MUTED]);
         }
 
-        self::addSignatures($section, $sheet);
+        if ($sheet->clientSignature || $sheet->companySignature) {
+            self::addSignatures($section, $sheet);
+        }
+
+        // Un document Word doit finir par un paragraphe : minuscule, pour ne pas créer de page vide.
+        $section->addText('', ['size' => 1], ['spaceAfter' => 0]);
 
         return $word;
     }
@@ -96,7 +103,11 @@ class DocumentWord
         $table = $section->addTable(['width' => 100 * 50, 'unit' => 'pct']);
         $row = $table->addRow();
 
-        $row->addCell(self::cm(7))->addImage($sheet->logoPath, ['width' => 74]);
+        $logo = $row->addCell(self::cm(7));
+        if ($sheet->logoPath) {
+            // Largeur en points (1 cm = 28,35 pt), comme dans le PDF.
+            $logo->addImage($sheet->logoPath, ['width' => (int) round($sheet->logoWidthCm * 28.35)]);
+        }
 
         $right = $row->addCell(self::cm(self::CONTENT_CM - 7));
         $alignRight = ['alignment' => Jc::RIGHT];
@@ -108,8 +119,10 @@ class DocumentWord
             $run->addText($sheet->number, ['bold' => true, 'color' => self::RED]);
         }
 
-        $right->addText($sheet->amountLabel, ['size' => 9, 'color' => self::MUTED], $alignRight + ['spaceBefore' => self::pt(10)]);
-        $right->addText($sheet->amount, ['size' => 17, 'bold' => true], $alignRight);
+        if ($sheet->amountLabel !== null) {
+            $right->addText($sheet->amountLabel, ['size' => 9, 'color' => self::MUTED], $alignRight + ['spaceBefore' => self::pt(10)]);
+            $right->addText($sheet->amount, ['size' => 17, 'bold' => true], $alignRight);
+        }
 
         // Trait rouge sous l'en-tête.
         $section->addText('', ['size' => 2], [
@@ -146,7 +159,7 @@ class DocumentWord
         $section->addText('', ['size' => 6]);
 
         $widths = [0.9, self::CONTENT_CM - 0.9 - 2 - 2.8 - 3, 2, 2.8, 3];
-        $headers = ['#', 'Article & Description', 'Quantité', 'Prix Unitaire', 'Montant'];
+        $headers = array_values($sheet->columns);
         $align = [Jc::CENTER, Jc::LEFT, Jc::RIGHT, Jc::RIGHT, Jc::RIGHT];
 
         $table = $section->addTable(['width' => 100 * 50, 'unit' => 'pct', 'cellMarginLeft' => 100, 'cellMarginRight' => 100]);
@@ -199,30 +212,36 @@ class DocumentWord
         $table = $section->addTable(['width' => 100 * 50, 'unit' => 'pct']);
         $row = $table->addRow(self::cm(1.6), ['cantSplit' => true]);
 
-        foreach ([$sheet->clientSignature, $sheet->company['name'] ?? ''] as $i => $title) {
+        foreach ([$sheet->clientSignature, $sheet->companySignature] as $signature) {
             $cell = $row->addCell(self::cm(self::CONTENT_CM / 2));
-            if ($title) {
-                $cell->addText($title, ['bold' => true, 'color' => self::BLUE], ['alignment' => Jc::CENTER]);
-                $cell->addText($i === 0 ? '(Date, cachet et signature)' : '(Cachet et signature)', ['size' => 8.5, 'color' => self::MUTED], ['alignment' => Jc::CENTER]);
+            if ($signature) {
+                $cell->addText($signature[0], ['bold' => true, 'color' => self::BLUE], ['alignment' => Jc::CENTER]);
+                $cell->addText($signature[1], ['size' => 8.5, 'color' => self::MUTED], ['alignment' => Jc::CENTER]);
             }
         }
-
-        // Un document Word doit finir par un paragraphe : minuscule, pour ne pas créer de page vide.
-        $section->addText('', ['size' => 1], ['spaceAfter' => 0]);
     }
 
     private static function addFooter(Section $section, DocumentSheet $sheet): void
     {
+        if (! $sheet->showFooter && ! $sheet->showPageNumbers) {
+            return;
+        }
+
         $footer = $section->addFooter();
         $center = ['alignment' => Jc::CENTER];
 
-        $footer->addText($sheet->footerTitle(), ['size' => 8, 'bold' => true, 'color' => self::BLUE], $center + [
-            'borderTopSize' => 12, 'borderTopColor' => self::RED, 'spaceBefore' => 0,
-        ]);
-        foreach ($sheet->footerLines() as $line) {
-            $footer->addText($line, ['size' => 8, 'color' => self::MUTED], $center);
+        if ($sheet->showFooter) {
+            $footer->addText($sheet->footerTitle(), ['size' => 8, 'bold' => true, 'color' => self::BLUE], $center + [
+                'borderTopSize' => 12, 'borderTopColor' => self::RED, 'spaceBefore' => 0,
+            ]);
+            foreach ($sheet->footerLines() as $line) {
+                $footer->addText($line, ['size' => 8, 'color' => self::MUTED], $center);
+            }
         }
-        $footer->addPreserveText('Page {PAGE} / {NUMPAGES}', ['size' => 8, 'color' => self::MUTED], $center);
+
+        if ($sheet->showPageNumbers) {
+            $footer->addPreserveText('Page {PAGE} / {NUMPAGES}', ['size' => 8, 'color' => self::MUTED], $center);
+        }
     }
 
     /**

@@ -17,6 +17,10 @@ class DocumentPdf
         $dompdf = $pdf->getDomPDF();
         $dompdf->render();
 
+        if (! $sheet->showPageNumbers) {
+            return $dompdf->output();
+        }
+
         // Numéro de page sous le pied de page (dompdf remplace {PAGE_NUM} et {PAGE_COUNT}).
         $canvas = $dompdf->getCanvas();
         $metrics = $dompdf->getFontMetrics();

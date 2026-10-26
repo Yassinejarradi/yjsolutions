@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentLogoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\Settings\CompanySettingsController;
@@ -35,6 +36,11 @@ Route::middleware('auth')->group(function () {
         Route::patch('refuser', 'refuse')->name('refuse');
     });
 
+    // Logos propres à un document (nom aléatoire, jamais choisi par l'utilisateur).
+    Route::get('logos-documents/{file}', DocumentLogoController::class)
+        ->where('file', '[A-Za-z0-9]+\.(png|jpe?g)')
+        ->name('document-logo');
+
     Route::get('profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');
 
@@ -47,6 +53,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('documents', [DocumentSettingsController::class, 'edit'])->name('documents');
         Route::put('documents', [DocumentSettingsController::class, 'update'])->name('documents.update');
+        Route::delete('documents/mise-en-page/{type}', [DocumentSettingsController::class, 'resetLayout'])->name('documents.layout.reset');
 
         Route::resource('utilisateurs', UserController::class)
             ->except('show')

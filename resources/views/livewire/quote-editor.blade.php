@@ -24,6 +24,7 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
+            <button type="button" class="btn-secondary" @click="layoutPanel = true">Mise en page</button>
             @if ($quoteId)
                 <button type="button" class="btn-secondary" @click="openAfterSave(@js(route('quotes.pdf', $quoteId)))">Aperçu PDF</button>
                 <button type="button" class="btn-secondary" @click="openAfterSave(@js(route('quotes.word', $quoteId)), false)">Word</button>
@@ -46,27 +47,46 @@
     @endif
 
     <p class="mx-auto mb-4 max-w-[210mm] text-muted">
-        Cliquez sur un texte pour le modifier. Les montants, les totaux et la somme en lettres se calculent seuls.
+        Cliquez sur n’importe quel texte pour le modifier, y compris les titres et les libellés. Le logo, les éléments affichés
+        et les informations de la société se règlent dans « Mise en page ». Les montants se calculent seuls.
     </p>
 
     {{-- ===================== Feuille A4 ===================== --}}
     <div class="doc-sheet">
         {{-- En-tête --}}
         <div class="flex items-start justify-between gap-4">
-            <img src="{{ route('logo') }}" alt="{{ $company['name'] }}" class="w-20 shrink-0 sm:w-[105px]">
-            <div class="text-right">
-                <h2 class="doc-title">DEVIS</h2>
-                <p class="mt-1 font-bold">N° de devis : <span class="font-normal italic text-muted">attribué à l’envoi</span></p>
-                <p class="doc-muted mt-3 text-[13px]">Total TTC</p>
-                <p class="text-[22px] font-bold tabular-nums">{{ Money::format($totals->totalTtc, true) }}</p>
+            <div class="shrink-0">
+                @if ($logoUrl)
+                    <button type="button" @click="layoutPanel = true" title="Modifier ou retirer le logo"
+                            class="rounded border border-dashed border-transparent p-0.5 hover:border-line focus:border-brand focus:outline-none">
+                        <img src="{{ $logoUrl }}" alt="Logo" class="max-w-[28vw] sm:max-w-none" style="width: {{ $logoWidthPx }}px">
+                    </button>
+                @else
+                    <button type="button" @click="layoutPanel = true"
+                            class="rounded border border-dashed border-line px-3 py-6 text-sm font-semibold text-muted hover:border-brand hover:text-brand">
+                        + Ajouter un logo
+                    </button>
+                @endif
+            </div>
+            <div class="min-w-0 flex-1 text-right">
+                <x-document.label key="title" label="Titre du document" class="doc-title" />
+                <p class="mt-1 flex flex-wrap items-baseline justify-end gap-1 font-bold">
+                    <x-document.label key="number" label="Libellé du numéro" class="doc-input-fit text-right font-bold" />
+                    <span class="font-normal italic text-muted">attribué à l’envoi</span>
+                </p>
+                @if ($layout['show']['amount'])
+                    <x-document.label key="amount" label="Libellé du montant" class="doc-muted mt-3 text-right text-[13px]" />
+                    <p class="text-[22px] font-bold tabular-nums">{{ Money::format($totals->totalTtc, true) }}</p>
+                @endif
             </div>
         </div>
         <hr class="doc-rule">
 
         {{-- Client et dates --}}
         <div class="mb-5 flex flex-col gap-5 sm:flex-row sm:justify-between">
-            <div class="min-w-0 flex-1" x-data="clientPicker()" @click.outside="open = false" data-no-autosave>
-                <p class="doc-muted mb-1">Devis établi pour</p>
+            <div class="min-w-0 flex-1">
+                <x-document.label key="client" label="Libellé du client" class="doc-input-fit doc-muted mb-1" />
+                <div x-data="clientPicker()" @click.outside="open = false" data-no-autosave>
 
                 <div class="relative">
                     @if ($client)
@@ -74,7 +94,7 @@
                                 class="w-full rounded border border-dashed border-transparent px-1 py-0.5 text-left hover:border-line focus:border-brand focus:outline-none">
                             <span class="block text-[17px] font-bold">{{ $client->name }}</span>
                             @if ($client->fullAddress())<span class="block">{{ $client->fullAddress() }}</span>@endif
-                            @if ($client->ice)<span class="mt-1.5 block">ICE : {{ $client->ice }}</span>@endif
+                            @if ($client->ice && $layout['show']['client_ice'])<span class="mt-1.5 block">ICE : {{ $client->ice }}</span>@endif
                             <span class="mt-1 block text-sm font-semibold text-brand">Changer de client</span>
                         </button>
                     @else
@@ -111,33 +131,36 @@
                         </button>
                     </div>
                 </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-[auto_9.5rem] items-center gap-x-3 gap-y-1 sm:text-right">
-                <label for="issue-date">Date du devis :</label>
+                <x-document.label key="date" label="Libellé de la date" class="doc-input-fit sm:text-right" />
                 <div>
-                    <input id="issue-date" wire:model.live.blur="issueDate" placeholder="JJ/MM/AAAA" inputmode="numeric"
+                    <input id="issue-date" aria-label="Date" wire:model.live.blur="issueDate" placeholder="JJ/MM/AAAA" inputmode="numeric"
                            @class(['doc-input text-right text-muted', 'is-invalid' => $errors->has('issueDate')])>
                     @error('issueDate')<p class="text-right text-xs font-semibold text-accent">{{ $message }}</p>@enderror
                 </div>
-                <label for="valid-until">Valable jusqu’au :</label>
+                <x-document.label key="due_date" label="Libellé de la date de validité" class="doc-input-fit sm:text-right" />
                 <div>
-                    <input id="valid-until" wire:model.live.blur="validUntil" placeholder="JJ/MM/AAAA" inputmode="numeric"
+                    <input id="valid-until" aria-label="Date de validité" wire:model.live.blur="validUntil" placeholder="JJ/MM/AAAA" inputmode="numeric"
                            @class(['doc-input text-right text-muted', 'is-invalid' => $errors->has('validUntil')])>
                     @error('validUntil')<p class="text-right text-xs font-semibold text-accent">{{ $message }}</p>@enderror
                 </div>
-                <label for="reference">Réf. demande :</label>
-                <input id="reference" wire:model.live.debounce.800ms="reference" placeholder="facultatif" class="doc-input text-right text-muted">
+                @if ($layout['show']['reference'])
+                    <x-document.label key="reference" label="Libellé de la référence" class="doc-input-fit sm:text-right" />
+                    <input id="reference" aria-label="Référence" wire:model.live.debounce.800ms="reference" placeholder="facultatif" class="doc-input text-right text-muted">
+                @endif
             </div>
         </div>
 
         {{-- Lignes --}}
-        <div class="doc-lines-head text-[14px]" aria-hidden="true">
-            <div class="px-1.5 py-2 text-center">#</div>
-            <div class="px-1.5 py-2">Article &amp; Description</div>
-            <div class="px-1.5 py-2 text-right">Quantité</div>
-            <div class="px-1.5 py-2 text-right">Prix Unitaire</div>
-            <div class="px-1.5 py-2 text-right">Montant</div>
+        <div class="doc-lines-head text-[14px]">
+            <div class="px-0.5 py-1"><x-document.label key="col_number" label="En-tête de colonne : numéro" class="doc-input-head text-center" /></div>
+            <div class="px-0.5 py-1"><x-document.label key="col_description" label="En-tête de colonne : désignation" class="doc-input-head" /></div>
+            <div class="px-0.5 py-1"><x-document.label key="col_quantity" label="En-tête de colonne : quantité" class="doc-input-head text-right" /></div>
+            <div class="px-0.5 py-1"><x-document.label key="col_unit_price" label="En-tête de colonne : prix" class="doc-input-head text-right" /></div>
+            <div class="px-0.5 py-1"><x-document.label key="col_amount" label="En-tête de colonne : montant" class="doc-input-head text-right" /></div>
             <div></div>
         </div>
 
@@ -155,7 +178,7 @@
 
                     {{-- Désignation (plusieurs lignes, s'agrandit seule) avec auto-complétion --}}
                     <div class="relative col-span-2 md:col-span-1" x-data="lineSuggest()" @click.outside="open = false">
-                        <label class="doc-cell-label" for="desc-{{ $line['key'] }}">Article et description</label>
+                        <label class="doc-cell-label" for="desc-{{ $line['key'] }}">{{ $layout['labels']['col_description'] }}</label>
                         <textarea id="desc-{{ $line['key'] }}" rows="1" data-field="description"
                                   wire:model.live.debounce.800ms="lines.{{ $i }}.description"
                                   x-init="$nextTick(() => autosize($el))"
@@ -179,14 +202,14 @@
                     </div>
 
                     <div>
-                        <label class="doc-cell-label" for="qty-{{ $line['key'] }}">Quantité</label>
+                        <label class="doc-cell-label" for="qty-{{ $line['key'] }}">{{ $layout['labels']['col_quantity'] }}</label>
                         <input id="qty-{{ $line['key'] }}" inputmode="decimal" data-field="quantity"
                                wire:model.live.debounce.400ms="lines.{{ $i }}.quantity"
                                @class(['doc-input md:text-right tabular-nums', 'is-invalid' => $errors->has("lines.$i.quantity")])>
                     </div>
 
                     <div>
-                        <label class="doc-cell-label" for="pu-{{ $line['key'] }}">Prix unitaire HT</label>
+                        <label class="doc-cell-label" for="pu-{{ $line['key'] }}">{{ $layout['labels']['col_unit_price'] }}</label>
                         <input id="pu-{{ $line['key'] }}" inputmode="decimal" data-field="unit_price" placeholder="0,00"
                                wire:model.live.debounce.400ms="lines.{{ $i }}.unit_price"
                                @if ($loop->last) @keydown.tab="if (! $event.shiftKey) { $event.preventDefault(); $wire.addLine() }" @endif
@@ -194,7 +217,7 @@
                     </div>
 
                     <div class="col-span-2 flex items-baseline justify-between pt-1 font-semibold tabular-nums md:col-span-1 md:block md:pt-1 md:text-right">
-                        <span class="doc-cell-label">Montant</span>
+                        <span class="doc-cell-label">{{ $layout['labels']['col_amount'] }}</span>
                         {{ Money::format($totals->lineAmounts[$i] ?? 0) }}
                     </div>
 
@@ -228,12 +251,12 @@
         {{-- Totaux --}}
         <div class="ml-auto mt-4 w-full tabular-nums sm:w-[21rem]">
             <div class="flex items-center justify-between gap-2 px-2 py-1">
-                <span>{{ $totals->hasDiscount() ? 'Sous-total' : 'Total avant remise' }}</span>
+                <x-document.label key="subtotal" label="Libellé du sous-total" class="doc-input-fit" />
                 <span>{{ Money::format($totals->subtotal) }}</span>
             </div>
             <div class="flex items-center justify-between gap-2 px-2 py-1">
                 <label for="discount" class="flex items-center gap-1">
-                    Remise
+                    <x-document.label key="discount" label="Libellé de la remise" class="doc-input-fit" />
                     <input id="discount" wire:model.live.debounce.400ms="discountPercent" inputmode="decimal" placeholder="0"
                            @class(['doc-input w-16 text-right', 'is-invalid' => $errors->has('discountPercent')])> %
                 </label>
@@ -241,11 +264,12 @@
             </div>
             @error('discountPercent')<p class="px-2 text-sm font-semibold text-accent">{{ $message }}</p>@enderror
             <div class="flex items-center justify-between gap-2 px-2 py-1 font-semibold">
-                <span>Total HT</span>
+                <x-document.label key="total_ht" label="Libellé du total HT" class="doc-input-fit font-semibold" />
                 <span>{{ Money::format($totals->totalHt) }}</span>
             </div>
             <div class="flex items-center justify-between gap-2 px-2 py-1">
-                <label for="vat-rate">TVA
+                <label for="vat-rate" class="flex items-center gap-1">
+                    <x-document.label key="vat" label="Libellé de la TVA" class="doc-input-fit" />
                     (<select id="vat-rate" wire:model.live="vatRate" class="doc-input inline w-auto py-0 pr-6">
                         @foreach (\App\Support\DocumentCalculator::VAT_RATES as $rate)
                             <option value="{{ $rate }}">{{ $rate }} %</option>
@@ -255,31 +279,35 @@
                 <span>{{ Money::format($totals->vat) }}</span>
             </div>
             <div class="mt-1 flex items-center justify-between gap-2 bg-brand px-2 py-1.5 font-bold text-white">
-                <span>Net à payer TTC</span>
+                <x-document.label key="due" label="Libellé du net à payer" class="doc-input-fit doc-input-head font-bold" />
                 <span>{{ Money::format($totals->totalTtc, true) }}</span>
             </div>
         </div>
 
-        <p class="mt-5"><b>Arrêté le présent devis à la somme de :</b> <i class="text-muted">{{ $words }}</i></p>
+        @if ($layout['show']['words'])
+            <p class="mt-5 flex flex-wrap items-baseline gap-1">
+                <x-document.label key="words" label="Libellé du montant en lettres" class="doc-input-fit font-bold" />
+                <i class="text-muted">{{ $words }}</i>
+            </p>
+        @endif
 
         {{-- Conditions --}}
         <div class="mt-3 grid gap-1">
-            <p><b>Validité de l’offre :</b>
-                @if ($validityDays !== null)
-                    {{ $validityDays }} jours, jusqu’au {{ $validUntil }}
-                @else
-                    —
-                @endif
-            </p>
-            <div class="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
-                <label for="payment-terms" class="shrink-0 font-bold">Modalités de paiement :</label>
-                <input id="payment-terms" wire:model.live.debounce.800ms="paymentTerms" placeholder="ex. 50 % à la commande, solde à la livraison" class="doc-input">
+            @if ($layout['show']['validity'])
+                <p class="flex flex-wrap items-baseline gap-1">
+                    <x-document.label key="validity" label="Libellé de la validité" class="doc-input-fit font-bold" />
+                    <span>{{ $validityDays !== null ? $validityDays.' jours, jusqu’au '.$validUntil : '—' }}</span>
+                </p>
+            @endif
+            <div @class(['flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5', 'hidden' => ! $layout['show']['payment_terms']])>
+                <x-document.label key="payment_terms" label="Libellé des modalités de paiement" class="doc-input-fit shrink-0 font-bold" />
+                <input id="payment-terms" aria-label="Modalités de paiement" wire:model.live.debounce.800ms="paymentTerms" placeholder="ex. 50 % à la commande, solde à la livraison" class="doc-input">
             </div>
-            <div class="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
-                <label for="completion-delay" class="shrink-0 font-bold">Délai de réalisation :</label>
-                <input id="completion-delay" wire:model.live.debounce.800ms="completionDelay" placeholder="ex. 3 semaines" class="doc-input">
+            <div @class(['flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5', 'hidden' => ! $layout['show']['completion_delay']])>
+                <x-document.label key="completion_delay" label="Libellé du délai de réalisation" class="doc-input-fit shrink-0 font-bold" />
+                <input id="completion-delay" aria-label="Délai de réalisation" wire:model.live.debounce.800ms="completionDelay" placeholder="ex. 3 semaines" class="doc-input">
             </div>
-            <div class="mt-2">
+            <div @class(['mt-2', 'hidden' => ! $layout['show']['notes']])>
                 <label for="notes" class="text-sm text-muted">Mentions (facultatif)</label>
                 <textarea id="notes" rows="1" wire:model.live.debounce.800ms="notes" x-init="$nextTick(() => autosize($el))" @input="autosize($el)"
                           placeholder="Texte imprimé en petit sous les conditions" class="doc-input text-sm text-muted"></textarea>
@@ -287,12 +315,30 @@
         </div>
 
         {{-- Signatures --}}
-        <div class="mt-8 flex justify-between text-center font-bold text-brand">
-            <div class="w-[45%]">Bon pour accord – Client<small class="block font-normal text-muted">(Date, cachet et signature)</small></div>
-            <div class="w-[45%]">{{ $company['name'] }}<small class="block font-normal text-muted">(Cachet et signature)</small></div>
-        </div>
+        @if ($layout['show']['client_signature'] || $layout['show']['company_signature'])
+            <div class="mt-8 flex justify-between gap-4 text-center">
+                <div class="w-[45%]">
+                    @if ($layout['show']['client_signature'])
+                        <x-document.label key="client_signature" label="Titre de la signature du client" class="text-center font-bold text-brand" />
+                        <x-document.label key="client_signature_note" label="Mention sous la signature du client" class="text-center text-sm text-muted" />
+                    @endif
+                </div>
+                <div class="w-[45%]">
+                    @if ($layout['show']['company_signature'])
+                        <x-document.label key="company_signature" label="Titre de la signature de la société" :placeholder="$company['name']"
+                                          class="text-center font-bold text-brand placeholder:text-brand" />
+                        <x-document.label key="company_signature_note" label="Mention sous la signature de la société" class="text-center text-sm text-muted" />
+                    @endif
+                </div>
+            </div>
+        @endif
 
-        <x-document.footer :company="$company" class="mt-16" />
+        @if ($layout['show']['footer'])
+            <button type="button" @click="layoutPanel = true" title="Modifier les informations de la société sur ce document"
+                    class="mt-16 block w-full rounded border border-dashed border-transparent hover:border-line">
+                <x-document.footer :company="$company" />
+            </button>
+        @endif
     </div>
 
     {{-- « Annuler » après la suppression d'une ligne --}}
@@ -331,4 +377,6 @@
             </form>
         </div>
     @endif
+
+    @include('livewire.partials.layout-panel', ['documentLabel' => 'devis'])
 </div>

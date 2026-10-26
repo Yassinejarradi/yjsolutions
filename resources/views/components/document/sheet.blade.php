@@ -12,14 +12,20 @@
     @endif
 
     <div class="flex items-start justify-between gap-4">
-        <img src="{{ route('logo') }}" alt="{{ $sheet->company['name'] ?? '' }}" class="w-20 shrink-0 sm:w-[105px]">
+        @if ($sheet->logoPath)
+            <img src="{{ $sheet->logoDataUri() }}" alt="{{ $sheet->company['name'] ?? '' }}" class="max-w-[30%] shrink-0" style="width: {{ $sheet->logoWidthPx() }}px">
+        @else
+            <span></span>
+        @endif
         <div class="text-right">
             <h2 class="doc-title">{{ $sheet->title }}</h2>
             @if ($sheet->number)
                 <p class="mt-1 font-bold">{{ $sheet->numberLabel }} <span class="text-accent">{{ $sheet->number }}</span></p>
             @endif
-            <p class="doc-muted mt-3 text-[13px]">{{ $sheet->amountLabel }}</p>
-            <p class="text-[22px] font-bold tabular-nums">{{ $sheet->amount }}</p>
+            @if ($sheet->amountLabel !== null)
+                <p class="doc-muted mt-3 text-[13px]">{{ $sheet->amountLabel }}</p>
+                <p class="text-[22px] font-bold tabular-nums">{{ $sheet->amount }}</p>
+            @endif
         </div>
     </div>
     <hr class="doc-rule">
@@ -40,20 +46,20 @@
     </div>
 
     <div class="doc-lines-head text-[14px]" aria-hidden="true">
-        <div class="px-1.5 py-2 text-center">#</div>
-        <div class="px-1.5 py-2">Article &amp; Description</div>
-        <div class="px-1.5 py-2 text-right">Quantité</div>
-        <div class="px-1.5 py-2 text-right">Prix Unitaire</div>
-        <div class="col-span-2 px-1.5 py-2 text-right">Montant</div>
+        <div class="px-1.5 py-2 text-center">{{ $sheet->columns['number'] }}</div>
+        <div class="px-1.5 py-2">{{ $sheet->columns['description'] }}</div>
+        <div class="px-1.5 py-2 text-right">{{ $sheet->columns['quantity'] }}</div>
+        <div class="px-1.5 py-2 text-right">{{ $sheet->columns['unit_price'] }}</div>
+        <div class="col-span-2 px-1.5 py-2 text-right">{{ $sheet->columns['amount'] }}</div>
     </div>
     @foreach ($sheet->lines as $line)
         <div class="doc-line">
             <div class="col-span-2 text-muted md:col-span-1 md:text-center"><span class="md:hidden">Ligne </span>{{ $line['number'] }}</div>
             <div class="col-span-2 whitespace-pre-line md:col-span-1">{{ $line['description'] }}</div>
-            <div class="md:text-right"><span class="doc-cell-label">Quantité</span>{{ $line['quantity'] }}</div>
-            <div class="md:text-right"><span class="doc-cell-label">Prix unitaire HT</span>{{ $line['unit_price'] }}</div>
+            <div class="md:text-right"><span class="doc-cell-label">{{ $sheet->columns['quantity'] }}</span>{{ $line['quantity'] }}</div>
+            <div class="md:text-right"><span class="doc-cell-label">{{ $sheet->columns['unit_price'] }}</span>{{ $line['unit_price'] }}</div>
             <div class="col-span-2 flex items-baseline justify-between font-semibold tabular-nums md:block md:text-right">
-                <span class="doc-cell-label">Montant</span>{{ $line['amount'] }}
+                <span class="doc-cell-label">{{ $sheet->columns['amount'] }}</span>{{ $line['amount'] }}
             </div>
         </div>
     @endforeach
@@ -70,7 +76,9 @@
         @endforeach
     </div>
 
-    <p class="mt-5"><b>{{ $sheet->wordsLabel }}</b> <i class="text-muted">{{ $sheet->words }}</i></p>
+    @if ($sheet->words !== null)
+        <p class="mt-5"><b>{{ $sheet->wordsLabel }}</b> <i class="text-muted">{{ $sheet->words }}</i></p>
+    @endif
 
     <div class="mt-3 grid gap-1">
         @foreach ($sheet->terms as [$label, $text])
@@ -81,12 +89,18 @@
         @endif
     </div>
 
-    <div class="mt-8 flex justify-between text-center font-bold text-brand">
-        <div class="w-[45%]">
-            @if ($sheet->clientSignature){{ $sheet->clientSignature }}<small class="block font-normal text-muted">(Date, cachet et signature)</small>@endif
+    @if ($sheet->clientSignature || $sheet->companySignature)
+        <div class="mt-8 flex justify-between text-center font-bold text-brand">
+            <div class="w-[45%]">
+                @if ($sheet->clientSignature){{ $sheet->clientSignature[0] }}<small class="block font-normal text-muted">{{ $sheet->clientSignature[1] }}</small>@endif
+            </div>
+            <div class="w-[45%]">
+                @if ($sheet->companySignature){{ $sheet->companySignature[0] }}<small class="block font-normal text-muted">{{ $sheet->companySignature[1] }}</small>@endif
+            </div>
         </div>
-        <div class="w-[45%]">{{ $sheet->company['name'] ?? '' }}<small class="block font-normal text-muted">(Cachet et signature)</small></div>
-    </div>
+    @endif
 
-    <x-document.footer :company="$sheet->company" class="mt-16" />
+    @if ($sheet->showFooter)
+        <x-document.footer :company="$sheet->company" class="mt-16" />
+    @endif
 </div>
