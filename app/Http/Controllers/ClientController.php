@@ -33,7 +33,10 @@ class ClientController extends Controller
 
     public function show(Client $client): View
     {
-        return view('clients.show', ['client' => $client]);
+        return view('clients.show', [
+            'client' => $client,
+            'quotes' => $client->quotes()->orderByDesc('issue_date')->orderByDesc('id')->get(),
+        ]);
     }
 
     public function edit(Client $client): View

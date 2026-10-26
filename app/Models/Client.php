@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -98,15 +99,43 @@ class Client extends Model
         $this->forceFill(['archived_at' => null])->save();
     }
 
+    public function quotes(): HasMany
+    {
+        return $this->hasMany(Quote::class);
+    }
+
     /**
      * Le client a-t-il des devis ou des factures ? Si oui, il ne peut être qu'archivé.
      *
-     * Les devis arrivent en phase 3 et les factures en phase 4 : compléter ici avec
-     * $this->quotes()->exists() || $this->invoices()->exists().
+     * Phase 4 : ajouter || $this->invoices()->exists().
      */
     public function hasDocuments(): bool
     {
-        return false;
+        return $this->quotes()->exists();
+    }
+
+    /**
+     * Informations copiées dans un document au moment de son émission.
+     *
+     * @return array{name: string, address: string, ice: string, if_number: string, rc: string}
+     */
+    public function toSnapshot(): array
+    {
+        return [
+            'name' => $this->name,
+            'address' => $this->fullAddress(),
+            'ice' => (string) $this->ice,
+            'if_number' => $this->if_number,
+            'rc' => $this->rc,
+        ];
+    }
+
+    /**
+     * Bloc client d'un brouillon dont le client n'est pas encore choisi.
+     */
+    public static function emptySnapshot(): array
+    {
+        return ['name' => '', 'address' => '', 'ice' => '', 'if_number' => '', 'rc' => ''];
     }
 
     /**

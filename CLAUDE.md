@@ -10,7 +10,7 @@ Référence : [docs/PLAN.md](docs/PLAN.md) (périmètre validé, phases). Le cah
 
 Laravel 12, Livewire 4, Blade, Tailwind 3, Pest, brick/math. SQLite en local, MySQL 8 en production.
 Composants Livewire **en classe** (`app/Livewire` + `resources/views/livewire`, réglé dans `config/livewire.php`), pas en fichier unique.
-Après avoir ajouté des classes Tailwind dans une vue : `npm run build`, sinon le CSS publié ne les contient pas.
+Après avoir ajouté des classes Tailwind dans une vue : `npm run build`, sinon le CSS publié ne les contient pas. Tailwind ne lit en PHP que `app/Enums` (couleurs des statuts).
 
 ```bash
 php artisan serve                          # http://localhost:8000
@@ -33,6 +33,11 @@ php artisan user:password adresse@email.ma
 
 Le document A4 s'édite directement à l'écran, sur le modèle de [docs/prototype.html](docs/prototype.html) : on clique sur un texte pour le modifier, lignes ajoutées/déplacées/supprimées sur la feuille, totaux et montant en lettres en direct.
 
+- Lignes, calculs, auto-complétion : trait `App\Livewire\Concerns\EditsDocumentLines` (à réutiliser pour les factures) ; JS Alpine dans `resources/js/document-editor.js`.
+- Écran en lecture, PDF et Word lisent tous `App\Support\DocumentSheet` : ne jamais formater un montant ailleurs.
+- Les lignes ont `wire:key` = clé + position : sinon, après un déplacement, les champs liés par position affichent l'ancienne valeur.
+- PhpWord : échappement activé et largeurs en twips entiers, sinon Word refuse d'ouvrir le fichier.
+
 ## Règles métier
 
 - Numérotation sans trou (`FAC2026-001`, `DEV2026-001`), attribuée à l'émission, en transaction avec verrou.
@@ -46,4 +51,6 @@ Le document A4 s'édite directement à l'écran, sur le modèle de [docs/prototy
 - Travailler phase par phase. À la fin de chaque phase : tests, captures ordinateur et téléphone, commit, push, résumé.
 - Ne pas commencer une phase sans le feu vert de l'utilisateur.
 - Pour arrêter un serveur de test : n'arrêter que le processus lancé soi-même (par son PID), **jamais tous les php.exe**.
-- Captures : base SQLite jetable (variables `DB_CONNECTION`/`DB_DATABASE`), serveur `php -S` lancé **depuis `public/`** avec le routeur `vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php`.
+- Captures : base SQLite jetable (variables `DB_CONNECTION`/`DB_DATABASE`), serveur `php -S` lancé **depuis `public/`** avec le routeur `vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php`. Captures ordinateur, tablette et téléphone.
+- `php artisan tinker fichier.php` attend une saisie : toujours ajouter `< /dev/null`.
+- Vérifier un .docx en l'ouvrant avec Word (COM PowerShell `Word.Application`, puis `Quit()`).

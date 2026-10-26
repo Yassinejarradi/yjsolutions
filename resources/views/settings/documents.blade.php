@@ -54,6 +54,9 @@
             <div class="space-y-5">
                 <x-field name="quote_payment_terms" label="Modalités de paiement des devis" :value="$setting->quote_payment_terms"
                          placeholder="Ex. : 50 % à la commande, solde à la livraison" />
+                <x-field name="quote_completion_delay" label="Délai de réalisation des devis" :value="$setting->quote_completion_delay"
+                         placeholder="Ex. : 3 semaines à compter de l’accord" />
+                <p class="field-help -mt-3">Ces deux textes sont proposés sur chaque nouveau devis et restent modifiables devis par devis.</p>
                 <x-field name="invoice_notes" label="Mentions en bas des factures" type="textarea" :value="$setting->invoice_notes"
                          placeholder="Ex. : Tout retard de paiement entraîne des pénalités…" />
                 <x-field name="quote_notes" label="Mentions en bas des devis" type="textarea" :value="$setting->quote_notes" />

@@ -72,11 +72,19 @@ Plan validé le 26/10/2026, après réduction du périmètre. Le cahier des char
 
 1. **Base** ✅ : projet, connexion, commandes `user:create` et `user:password`, mise en page avec sidebar, Paramètres (société, logo, banque, documents, utilisateurs), cœur de calcul (`Money`, `AmountInWords`, `DocumentCalculator`) et ses tests.
 2. **Clients** ✅ : liste (recherche, filtre Actifs / Archivés, tri par nom), formulaire, fiche (place prête pour devis, factures, total facturé et reste à payer), archivage ; suppression seulement sans document.
-3. **Éditeur et devis** :
-   - éditeur visuel A4 en Livewire, repris du prototype ;
+3. **Éditeur et devis** ✅ :
+   - éditeur visuel A4 en Livewire (`QuoteEditor` + trait réutilisable `EditsDocumentLines`), repris du prototype ;
    - numérotation, statuts ;
    - PDF (dompdf, police Carlito, filigrane) et Word (PhpWord) ;
-   - dupliquer, convertir en facture.
+   - dupliquer. La conversion devis → facture est reportée en phase 4.
+
+   Choix de réalisation :
+   - un nouveau devis n'est créé en base qu'à la première saisie (pas de brouillons vides) ;
+   - sauvegarde automatique 2 s après la dernière modification ; les montants affichés viennent toujours du serveur ;
+   - `App\Support\DocumentSheet` est l'unique source de l'écran en lecture, du PDF et du Word (tests de cohérence) ;
+   - « Validité de l'offre » est calculée à partir de « Valable jusqu'au » (pas de texte séparé à tenir à jour) ;
+   - le statut « Envoyé » s'obtient par le bouton « Marquer comme envoyé » (pas d'email) ;
+   - seul un brouillon peut être supprimé ; Paramètres › Devis et factures a un « Délai de réalisation » par défaut.
 4. **Factures et paiements** : émission verrouillée, paiement total ou partiel, retard, annulation, PDF et Word.
 5. **Tableau de bord et finitions** :
    - indicateurs et graphique du CA sur 12 mois ;

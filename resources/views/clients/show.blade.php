@@ -82,10 +82,36 @@
         </section>
 
         <div class="space-y-8 lg:col-span-2">
-            {{-- Devis du client : phase 3. --}}
             <section class="card">
-                <h2 class="card-title">Devis</h2>
-                <p class="text-muted">Aucun devis pour ce client.</p>
+                <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+                    <h2 class="text-xl font-bold">Devis</h2>
+                    @unless ($client->isArchived())
+                        <a href="{{ route('quotes.create', ['client' => $client->id]) }}" class="btn-secondary">+ Nouveau devis</a>
+                    @endunless
+                </div>
+
+                @if ($quotes->isEmpty())
+                    <p class="text-muted">Aucun devis pour ce client.</p>
+                @else
+                    <ul class="-mx-5 divide-y divide-line border-t border-line sm:-mx-7">
+                        @foreach ($quotes as $quote)
+                            @php($status = $quote->displayStatus())
+                            <li>
+                                <a href="{{ route('quotes.show', $quote) }}"
+                                   class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3 hover:bg-brand-soft sm:px-7">
+                                    <span>
+                                        <span class="font-semibold {{ $quote->number ? 'text-accent' : 'italic text-muted' }}">{{ $quote->number ?? 'Brouillon' }}</span>
+                                        <span class="text-muted">· {{ $quote->issue_date->format('d/m/Y') }}</span>
+                                    </span>
+                                    <span class="flex items-center gap-3">
+                                        <span class="font-semibold tabular-nums">{{ Money::format($quote->total_ttc, true) }}</span>
+                                        <span class="rounded px-2 py-0.5 text-sm font-semibold {{ $status->badgeClasses() }}">{{ $status->label() }}</span>
+                                    </span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </section>
 
             {{-- Factures du client : phase 4. --}}

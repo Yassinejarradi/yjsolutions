@@ -1,7 +1,11 @@
 import './bootstrap';
 
 // Livewire embarque Alpine.js : on le démarre depuis le bundle ESM pour pouvoir
-// ajouter des plugins Alpine (ex. glisser-déposer des lignes) sans charger Alpine deux fois.
-import { Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
+// ajouter des composants Alpine sans charger Alpine deux fois.
+import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
+import registerDocumentEditor, { autosize } from './document-editor';
+
+window.autosize = autosize;
+registerDocumentEditor(Alpine);
 
 Livewire.start();

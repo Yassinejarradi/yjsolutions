@@ -1,3 +1,16 @@
+/* Police des documents : Calibri si elle est installée, sinon Carlito (mêmes dimensions). */
+@font-face {
+    font-family: "Carlito";
+    font-weight: 400;
+    src: local("Calibri"), local("Carlito"), url("../fonts/carlito/Carlito-Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Carlito";
+    font-weight: 700;
+    src: local("Calibri Bold"), local("Carlito Bold"), url("../fonts/carlito/Carlito-Bold.ttf") format("truetype");
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -72,5 +85,70 @@
 
     .card-title {
         @apply mb-5 text-xl font-bold text-ink;
+    }
+
+    /* ---------- Document A4 (éditeur et lecture), d'après docs/prototype.html ---------- */
+
+    /* Sur téléphone la feuille prend toute la largeur ; à partir de la tablette, c'est une page A4. */
+    .doc-sheet {
+        @apply relative mx-auto w-full max-w-[210mm] bg-white px-4 py-5 text-ink shadow-lg sm:px-[10mm] sm:py-[10mm] lg:px-[13mm] lg:py-[12mm];
+        font-family: Calibri, Carlito, "Segoe UI", Arial, sans-serif;
+        font-size: 15px;
+        line-height: 1.35;
+    }
+
+    .doc-title {
+        @apply m-0 text-right text-[28px] font-bold tracking-wide text-brand sm:text-[38px];
+    }
+
+    .doc-rule {
+        @apply my-4 border-0 border-t-2 border-accent;
+    }
+
+    .doc-muted {
+        @apply text-muted;
+    }
+
+    /* Champ modifiable directement sur la feuille : invisible jusqu'au survol ou au clic. */
+    .doc-input {
+        @apply w-full rounded border border-dashed border-transparent bg-transparent px-1 py-0.5 text-inherit
+               placeholder:text-muted/60 hover:border-line focus:border-brand focus:bg-brand-soft/40 focus:outline-none focus:ring-0;
+        font: inherit;
+    }
+
+    .doc-input.is-invalid {
+        @apply border-solid border-accent bg-red-50;
+    }
+
+    textarea.doc-input {
+        @apply resize-none overflow-hidden;
+        field-sizing: content;
+    }
+
+    /* Lignes : tableau à partir de md, cartes empilées sur téléphone. */
+    .doc-lines-head {
+        @apply hidden bg-brand font-bold text-white md:grid;
+    }
+
+    .doc-line {
+        @apply relative grid gap-x-2 border-b border-line py-3 md:gap-y-0 md:py-1.5;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    @media (min-width: 768px) {
+        .doc-lines-head,
+        .doc-line {
+            /* En em : les colonnes suivent la taille du texte de la feuille (15 px), pas celle de l'interface. */
+            grid-template-columns: 2.4em minmax(0, 1fr) 4.4em 6.6em 6.8em 4.3em;
+        }
+    }
+
+    .doc-cell-label {
+        @apply mb-0.5 block text-xs font-semibold uppercase tracking-wide text-muted md:sr-only;
+    }
+
+    .doc-op {
+        @apply inline-flex h-7 w-7 items-center justify-center rounded bg-brand-soft text-sm text-ink hover:bg-brand hover:text-white
+               focus:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-30;
     }
 }

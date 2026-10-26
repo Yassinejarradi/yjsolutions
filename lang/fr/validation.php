@@ -116,6 +116,7 @@ return [
         'payment_terms_days' => 'délai de paiement',
         'quote_validity_days' => 'validité des devis',
         'quote_payment_terms' => 'modalités de paiement',
+        'quote_completion_delay' => 'délai de réalisation',
         'invoice_notes' => 'mentions des factures',
         'quote_notes' => 'mentions des devis',
         'city' => 'ville',

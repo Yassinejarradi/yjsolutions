@@ -8,6 +8,9 @@ export default {
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
         './resources/js/**/*.js',
+        // Classes définies côté PHP (ex. couleurs des statuts dans app/Enums).
+        './app/Enums/**/*.php',
+        './vendor/livewire/livewire/src/Features/SupportPagination/views/*.blade.php',
     ],
 
     theme: {

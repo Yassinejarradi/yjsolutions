@@ -3,6 +3,7 @@
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\Settings\CompanySettingsController;
 use App\Http\Controllers\Settings\DocumentSettingsController;
 use App\Http\Controllers\Settings\LogoController;
@@ -20,6 +21,19 @@ Route::middleware('auth')->group(function () {
     Route::resource('clients', ClientController::class);
     Route::patch('clients/{client}/archiver', [ClientController::class, 'archive'])->name('clients.archive');
     Route::patch('clients/{client}/reactiver', [ClientController::class, 'restore'])->name('clients.restore');
+
+    // Devis : /devis, /devis/nouveau, /devis/12 (éditeur si brouillon, lecture sinon)
+    Route::resource('devis', QuoteController::class)
+        ->only(['index', 'create', 'show', 'destroy'])
+        ->parameters(['devis' => 'quote'])
+        ->names('quotes');
+    Route::prefix('devis/{quote}')->name('quotes.')->controller(QuoteController::class)->group(function () {
+        Route::get('pdf', 'pdf')->name('pdf');
+        Route::get('word', 'word')->name('word');
+        Route::post('dupliquer', 'duplicate')->name('duplicate');
+        Route::patch('accepter', 'accept')->name('accept');
+        Route::patch('refuser', 'refuse')->name('refuse');
+    });
 
     Route::get('profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');

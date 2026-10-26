@@ -17,6 +17,7 @@ class DocumentSettingsRequest extends FormRequest
             'payment_terms_days' => ['required', 'integer', 'min:0', 'max:365'],
             'quote_validity_days' => ['required', 'integer', 'min:1', 'max:365'],
             'quote_payment_terms' => ['nullable', 'string', 'max:255'],
+            'quote_completion_delay' => ['nullable', 'string', 'max:255'],
             'invoice_notes' => ['nullable', 'string', 'max:2000'],
             'quote_notes' => ['nullable', 'string', 'max:2000'],
         ];
@@ -28,6 +29,7 @@ class DocumentSettingsRequest extends FormRequest
             'invoice_prefix' => mb_strtoupper(trim((string) $this->input('invoice_prefix'))),
             'quote_prefix' => mb_strtoupper(trim((string) $this->input('quote_prefix'))),
             'quote_payment_terms' => (string) $this->input('quote_payment_terms'),
+            'quote_completion_delay' => (string) $this->input('quote_completion_delay'),
         ]);
     }
 }

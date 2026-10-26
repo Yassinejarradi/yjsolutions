@@ -50,6 +50,25 @@ class Setting extends Model
     }
 
     /**
+     * Informations de la société copiées dans un document au moment de son émission.
+     */
+    public function toSnapshot(): array
+    {
+        return [
+            'name' => $this->company_name,
+            'address' => $this->address,
+            'phone' => $this->phone,
+            'email' => $this->email,
+            'ice' => $this->ice,
+            'rc' => $this->rc,
+            'if_number' => $this->if_number,
+            'tp' => $this->tp,
+            'cnss' => $this->cnss,
+            'bank_line' => $this->bankLine(),
+        ];
+    }
+
+    /**
      * Ligne « Banque – Agence – RIB » imprimée sur les factures.
      */
     public function bankLine(): string

@@ -66,6 +66,14 @@ class DocumentCalculator
             ->toInt();
     }
 
+    /**
+     * Quantité telle qu'enregistrée en base (3 décimales) : "1,5" => "1.500". Vide ou invalide => "0.000".
+     */
+    public static function normalizeQuantity(string|int|BigDecimal|null $quantity): string
+    {
+        return (string) self::toDecimal($quantity, 3);
+    }
+
     private static function percentOf(int $cents, BigDecimal $percent): int
     {
         return BigDecimal::of($cents)
