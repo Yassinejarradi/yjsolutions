@@ -18,5 +18,8 @@
             {{ $slot }}
         </div>
     </div>
+
+    {{-- app.js démarre Livewire : il lui faut sa configuration, comme dans layouts/app. --}}
+    @livewireScriptConfig
 </body>
 </html>
