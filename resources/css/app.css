@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    /* Grande taille de base : toute l'interface (rem) est agrandie pour une lecture confortable. */
+    html {
+        font-size: 17px;
+    }
+
+    @media (min-width: 1024px) {
+        html {
+            font-size: 18px;
+        }
+    }
+
+    body {
+        @apply bg-desk text-ink antialiased;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+@layer components {
+    /* Boutons : toujours un libellé en toutes lettres, zone de clic généreuse. */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 font-semibold leading-tight transition
+               focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2
+               disabled:cursor-not-allowed disabled:opacity-50;
+    }
+
+    .btn-primary {
+        @apply btn bg-brand text-white hover:bg-brand-dark;
+    }
+
+    .btn-secondary {
+        @apply btn border border-line bg-white text-ink hover:bg-brand-soft;
+    }
+
+    .btn-danger {
+        @apply btn bg-accent text-white hover:bg-accent-dark;
+    }
+
+    .btn-link {
+        @apply font-semibold text-brand underline-offset-4 hover:underline;
+    }
+
+    /* Formulaires */
+    .field-label {
+        @apply mb-1.5 block font-semibold text-ink;
+    }
+
+    .field-input {
+        @apply block w-full rounded-lg border-line bg-white px-3 py-2.5 text-ink shadow-sm
+               placeholder:text-muted/70 focus:border-brand focus:ring-brand;
+    }
+
+    .field-help {
+        @apply mt-1 text-sm text-muted;
+    }
+
+    .field-error {
+        @apply mt-1.5 text-sm font-semibold text-accent;
+    }
+
+    /* Cartes de contenu */
+    .card {
+        @apply rounded-xl border border-line bg-white p-5 shadow-sm sm:p-7;
+    }
+
+    .card-title {
+        @apply mb-5 text-xl font-bold text-ink;
+    }
+}
