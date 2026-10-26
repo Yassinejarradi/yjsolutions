@@ -32,7 +32,7 @@
             <div>
                 <label for="quote-period" class="field-label">Période (date du devis)</label>
                 <select id="quote-period" wire:model.live="period" class="field-input">
-                    @foreach (\App\Livewire\QuoteList::PERIODS as $value => $label)
+                    @foreach ($periods as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
                 </select>

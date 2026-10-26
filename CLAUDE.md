@@ -33,7 +33,8 @@ php artisan user:password adresse@email.ma
 
 Le document A4 s'édite directement à l'écran, sur le modèle de [docs/prototype.html](docs/prototype.html) : on clique sur un texte pour le modifier, lignes ajoutées/déplacées/supprimées sur la feuille, totaux et montant en lettres en direct.
 
-- Lignes, calculs, auto-complétion : trait `App\Livewire\Concerns\EditsDocumentLines` (à réutiliser pour les factures) ; JS Alpine dans `resources/js/document-editor.js`.
+- `QuoteEditor` et `InvoiceEditor` partagent tout : traits `EditsDocumentHeader` (client, dates), `EditsDocumentLines` (lignes, calculs, auto-complétion), `EditsDocumentLayout`, et les vues `livewire/partials/editor/*`. Modifier le partial, pas l'un des deux éditeurs. JS Alpine dans `resources/js/document-editor.js`.
+- Factures : statuts enregistrés brouillon / émise / annulée ; payée, partielle et en retard sont calculés (`Invoice::displayStatus()` et scope `withDisplayStatus`). `amount_paid` ne change que par `recordPayment()` / `removePayment()`.
 - Écran en lecture, PDF et Word lisent tous `App\Support\DocumentSheet` : ne jamais formater un montant ailleurs.
 - Mise en page (logo, textes, blocs, société) : `App\Support\DocumentLayout` + trait `EditsDocumentLayout` + panneau `livewire/partials/layout-panel`. Tout nouveau texte imprimé doit passer par `labels`, sinon il n'est pas modifiable.
 - Les lignes ont `wire:key` = clé + position : sinon, après un déplacement, les champs liés par position affichent l'ancienne valeur.

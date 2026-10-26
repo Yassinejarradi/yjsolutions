@@ -30,17 +30,19 @@ class DocumentSettingsController extends Controller
     }
 
     /**
-     * Revient à la mise en page d'origine pour un type de document (« quote »).
+     * Revient à la mise en page d'origine pour un type de document (« quote » ou « invoice »).
      */
     public function resetLayout(string $type): RedirectResponse
     {
-        abort_unless(in_array($type, ['quote'], true), 404);
+        $names = ['quote' => 'devis', 'invoice' => 'factures'];
+        abort_unless(isset($names[$type]), 404);
 
         $setting = Setting::current();
         $layouts = $setting->document_layouts ?? [];
         unset($layouts[$type]);
         $setting->update(['document_layouts' => $layouts ?: null]);
 
-        return redirect()->route('settings.documents')->with('success', 'La mise en page d’origine des devis est rétablie pour les prochains devis.');
+        return redirect()->route('settings.documents')
+            ->with('success', "La mise en page d’origine est rétablie pour les prochains {$names[$type]}.");
     }
 }

@@ -34,15 +34,16 @@
         </div>
     @endif
 
-    {{-- Totaux : calculés à partir des factures en phase 4. --}}
+    {{-- Totaux des factures émises (hors brouillons et factures annulées). --}}
+    @php($outstanding = $client->outstandingBalance())
     <div class="mb-8 grid gap-5 sm:grid-cols-2">
         <div class="card">
             <p class="text-lg text-muted">Total facturé</p>
-            <p class="mt-1 text-3xl font-bold tabular-nums">{{ Money::format(0, true) }}</p>
+            <p class="mt-1 text-3xl font-bold tabular-nums">{{ Money::format($client->billedTotal(), true) }}</p>
         </div>
         <div class="card">
             <p class="text-lg text-muted">Reste à payer</p>
-            <p class="mt-1 text-3xl font-bold tabular-nums">{{ Money::format(0, true) }}</p>
+            <p @class(['mt-1 text-3xl font-bold tabular-nums', 'text-accent' => $outstanding > 0])>{{ Money::format($outstanding, true) }}</p>
         </div>
     </div>
 
@@ -114,10 +115,36 @@
                 @endif
             </section>
 
-            {{-- Factures du client : phase 4. --}}
             <section class="card">
-                <h2 class="card-title">Factures</h2>
-                <p class="text-muted">Aucune facture pour ce client.</p>
+                <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+                    <h2 class="text-xl font-bold">Factures</h2>
+                    @unless ($client->isArchived())
+                        <a href="{{ route('invoices.create', ['client' => $client->id]) }}" class="btn-secondary">+ Nouvelle facture</a>
+                    @endunless
+                </div>
+
+                @if ($invoices->isEmpty())
+                    <p class="text-muted">Aucune facture pour ce client.</p>
+                @else
+                    <ul class="-mx-5 divide-y divide-line border-t border-line sm:-mx-7">
+                        @foreach ($invoices as $invoice)
+                            @php($status = $invoice->displayStatus())
+                            <li>
+                                <a href="{{ route('invoices.show', $invoice) }}"
+                                   class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3 hover:bg-brand-soft sm:px-7">
+                                    <span>
+                                        <span class="font-semibold {{ $invoice->number ? 'text-accent' : 'italic text-muted' }}">{{ $invoice->number ?? 'Brouillon' }}</span>
+                                        <span class="text-muted">· {{ $invoice->issue_date->format('d/m/Y') }}</span>
+                                    </span>
+                                    <span class="flex items-center gap-3">
+                                        <span class="font-semibold tabular-nums">{{ Money::format($invoice->total_ttc, true) }}</span>
+                                        <span class="rounded px-2 py-0.5 text-sm font-semibold {{ $status->badgeClasses() }}">{{ $status->label() }}</span>
+                                    </span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </section>
         </div>
     </div>

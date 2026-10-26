@@ -45,60 +45,86 @@ final class DocumentLayout
         'cnss' => 'CNSS',
     ];
 
-    /** Blocs que l'on peut masquer, avec leur nom dans le panneau « Mise en page ». */
-    public const BLOCKS = [
-        'amount' => 'Montant en haut à droite',
-        'client_ice' => 'ICE du client',
-        'reference' => 'Ligne « Réf. demande »',
-        'words' => 'Montant en lettres',
-        'validity' => 'Validité de l’offre',
-        'payment_terms' => 'Modalités de paiement',
-        'completion_delay' => 'Délai de réalisation',
-        'notes' => 'Mentions',
-        'client_signature' => 'Signature du client',
-        'company_signature' => 'Signature de la société',
-        'footer' => 'Pied de page (société)',
-        'page_numbers' => 'Numéro de page',
-    ];
+    /** Blocs que l'on peut masquer, par type de document, avec leur nom dans le panneau « Mise en page ». */
+    public static function blocks(string $type): array
+    {
+        $specific = $type === 'invoice'
+            ? ['reference' => 'Ligne « N° Bon de commande »', 'words' => 'Montant en lettres', 'payments' => 'Paiements reçus (dans les totaux)', 'bank' => 'Coordonnées bancaires']
+            : ['reference' => 'Ligne « Réf. demande »', 'words' => 'Montant en lettres', 'validity' => 'Validité de l’offre', 'payment_terms' => 'Modalités de paiement', 'completion_delay' => 'Délai de réalisation'];
+
+        return ['amount' => 'Montant en haut à droite', 'client_ice' => 'ICE du client'] + $specific + [
+            'notes' => 'Mentions',
+            'client_signature' => 'Signature du client',
+            'company_signature' => 'Signature de la société',
+            'footer' => 'Pied de page (société)',
+            'page_numbers' => 'Numéro de page',
+        ];
+    }
 
     /**
-     * Valeurs d'origine pour un type de document (« quote », et « invoice » en phase 4).
+     * Valeurs d'origine pour un type de document : « quote » (devis) ou « invoice » (facture).
      */
     public static function defaults(string $type): array
     {
         return [
             // frozen : logo des Paramètres copié à l'envoi (une copie du document reprend le logo actuel).
             'logo' => ['mode' => 'default', 'path' => null, 'size' => 'medium', 'frozen' => false],
-            'labels' => [
-                'title' => 'DEVIS',
-                'number' => 'N° de devis :',
-                'amount' => 'Total TTC',
-                'client' => 'Devis établi pour',
-                'date' => 'Date du devis :',
-                'due_date' => 'Valable jusqu’au :',
-                'reference' => 'Réf. demande :',
-                'col_number' => '#',
-                'col_description' => 'Article & Description',
-                'col_quantity' => 'Quantité',
-                'col_unit_price' => 'Prix Unitaire',
-                'col_amount' => 'Montant',
-                'subtotal' => 'Sous-total',
-                'discount' => 'Remise',
-                'total_ht' => 'Total HT',
-                'vat' => 'TVA',
-                'due' => 'Net à payer TTC',
-                'words' => 'Arrêté le présent devis à la somme de :',
-                'validity' => 'Validité de l’offre :',
-                'payment_terms' => 'Modalités de paiement :',
-                'completion_delay' => 'Délai de réalisation :',
-                'client_signature' => 'Bon pour accord – Client',
-                'client_signature_note' => '(Date, cachet et signature)',
-                'company_signature' => '', // vide : raison sociale de la société
-                'company_signature_note' => '(Cachet et signature)',
-            ],
-            'show' => array_fill_keys(array_keys(self::BLOCKS), true),
+            'labels' => self::defaultLabels($type),
+            // Sur une facture, la signature du client n'apparaît pas (comme dans le prototype).
+            'show' => array_merge(array_fill_keys(array_keys(self::blocks($type)), true), $type === 'invoice' ? ['client_signature' => false] : []),
             'company' => array_fill_keys(array_keys(self::COMPANY_FIELDS), null),
         ];
+    }
+
+    private static function defaultLabels(string $type): array
+    {
+        $common = [
+            'col_number' => '#',
+            'col_description' => 'Article & Description',
+            'col_quantity' => 'Quantité',
+            'col_unit_price' => 'Prix Unitaire',
+            'col_amount' => 'Montant',
+            'subtotal' => 'Sous-total',
+            'discount' => 'Remise',
+            'total_ht' => 'Total HT',
+            'vat' => 'TVA',
+            'client_signature' => 'Bon pour accord – Client',
+            'client_signature_note' => '(Date, cachet et signature)',
+            'company_signature' => '', // vide : raison sociale de la société
+            'company_signature_note' => '(Cachet et signature)',
+        ];
+
+        if ($type === 'invoice') {
+            return [
+                'title' => 'FACTURE',
+                'number' => 'N° de facture :',
+                'amount' => 'Solde exigible',
+                'client' => 'Facturer à',
+                'date' => 'Date de facture :',
+                'due_date' => 'Date d’échéance :',
+                'reference' => 'N° Bon de commande :',
+                'total_ttc' => 'Total TTC',
+                'paid' => 'Déjà payé',
+                'due' => 'Solde exigible',
+                'words' => 'Arrêtée la présente facture à la somme de :',
+                'bank' => 'Paiement par virement bancaire :',
+            ] + $common;
+        }
+
+        return [
+            'title' => 'DEVIS',
+            'number' => 'N° de devis :',
+            'amount' => 'Total TTC',
+            'client' => 'Devis établi pour',
+            'date' => 'Date du devis :',
+            'due_date' => 'Valable jusqu’au :',
+            'reference' => 'Réf. demande :',
+            'due' => 'Net à payer TTC',
+            'words' => 'Arrêté le présent devis à la somme de :',
+            'validity' => 'Validité de l’offre :',
+            'payment_terms' => 'Modalités de paiement :',
+            'completion_delay' => 'Délai de réalisation :',
+        ] + $common;
     }
 
     /**

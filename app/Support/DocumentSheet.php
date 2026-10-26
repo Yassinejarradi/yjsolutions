@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\DocumentLine;
+use App\Models\Invoice;
 use App\Models\Quote;
 
 /**
@@ -77,10 +78,11 @@ final readonly class DocumentSheet
             amount: Money::format($totals->totalTtc, true),
             clientLabel: $label['client'],
             client: $client,
+            // La ligne de référence n'est imprimée que si elle est remplie.
             dates: array_values(array_filter([
                 [$label['date'], $quote->issue_date->format('d/m/Y')],
                 [$label['due_date'], $quote->valid_until->format('d/m/Y')],
-                $show['reference'] ? [$label['reference'], $quote->reference] : null,
+                $show['reference'] && trim((string) $quote->reference) !== '' ? [$label['reference'], $quote->reference] : null,
             ])),
             columns: self::columns($label),
             lines: self::formatLines($lines, $totals),
@@ -102,6 +104,66 @@ final readonly class DocumentSheet
             logoPath: DocumentLayout::logoFile($layout),
             logoWidthCm: DocumentLayout::logoWidthCm($layout),
             fileName: $quote->fileName(),
+            totals: $totals,
+        );
+    }
+
+    public static function forInvoice(Invoice $invoice): self
+    {
+        $invoice->loadMissing('lines', 'client');
+        $layout = $invoice->resolvedLayout();
+        $label = $layout['labels'];
+        $show = $layout['show'];
+
+        $lines = $invoice->printableLines();
+        $totals = $invoice->calculateTotals($lines);
+        $company = $invoice->companyDetails();
+        $paid = $invoice->amount_paid;
+
+        $client = $invoice->clientDetails();
+        if (! $show['client_ice']) {
+            $client['ice'] = '';
+        }
+
+        // « Déjà payé » n'apparaît qu'après un paiement ; le solde exigible en tient compte.
+        $paidRow = $show['payments'] && $paid > 0 ? [$label['paid'], '-'.Money::format($paid, true)] : null;
+        $due = $show['payments'] ? max(0, $totals->totalTtc - $paid) : $totals->totalTtc;
+
+        return new self(
+            title: $label['title'],
+            numberLabel: $label['number'],
+            number: $invoice->number,
+            amountLabel: $show['amount'] ? $label['amount'] : null,
+            amount: Money::format($due, true),
+            clientLabel: $label['client'],
+            client: $client,
+            dates: array_values(array_filter([
+                [$label['date'], $invoice->issue_date->format('d/m/Y')],
+                [$label['due_date'], $invoice->due_date->format('d/m/Y')],
+                $show['reference'] && trim((string) $invoice->reference) !== '' ? [$label['reference'], $invoice->reference] : null,
+            ])),
+            columns: self::columns($label),
+            lines: self::formatLines($lines, $totals),
+            totalRows: self::totalRows($totals, $label, $label['total_ttc'], $paidRow, $due),
+            wordsLabel: $show['words'] ? $label['words'] : null,
+            words: $show['words'] ? AmountInWords::fromCents($totals->totalTtc) : null,
+            terms: array_values(array_filter([
+                $show['bank'] ? [$label['bank'], $company['bank_line'] ?? ''] : null,
+            ], fn (?array $term) => $term && trim($term[1]) !== '')),
+            notes: $show['notes'] && filled($invoice->notes) ? $invoice->notes : null,
+            clientSignature: $show['client_signature'] ? [$label['client_signature'], $label['client_signature_note']] : null,
+            companySignature: $show['company_signature'] ? [self::companySignatureTitle($label, $company), $label['company_signature_note']] : null,
+            company: $company,
+            showFooter: $show['footer'],
+            showPageNumbers: $show['page_numbers'],
+            watermark: match (true) {
+                $invoice->isDraft() => 'BROUILLON',
+                $invoice->isCancelled() => 'ANNULÉE',
+                default => null,
+            },
+            logoPath: DocumentLayout::logoFile($layout),
+            logoWidthCm: DocumentLayout::logoWidthCm($layout),
+            fileName: $invoice->fileName(),
             totals: $totals,
         );
     }
@@ -200,7 +262,7 @@ final readonly class DocumentSheet
      * Lignes du bloc des totaux. Avec une remise : Sous-total, Remise, puis Total HT.
      * Le taux est ajouté aux libellés « Remise » et « TVA » : « TVA (20 %) ».
      */
-    public static function totalRows(DocumentTotals $totals, array $labels, ?string $ttcLabel = null): array
+    public static function totalRows(DocumentTotals $totals, array $labels, ?string $ttcLabel = null, ?array $paidRow = null, ?int $due = null): array
     {
         $rows = [];
 
@@ -216,7 +278,11 @@ final readonly class DocumentSheet
             $rows[] = [$ttcLabel, Money::format($totals->totalTtc, true), 'bold'];
         }
 
-        $rows[] = [$labels['due'], Money::format($totals->totalTtc, true), 'due'];
+        if ($paidRow !== null) {
+            $rows[] = $paidRow;
+        }
+
+        $rows[] = [$labels['due'], Money::format($due ?? $totals->totalTtc, true), 'due'];
 
         return $rows;
     }

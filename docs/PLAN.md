@@ -87,7 +87,15 @@ Plan validé le 26/10/2026, après réduction du périmètre. Le cahier des char
    - « Validité de l'offre » est calculée à partir de « Valable jusqu'au » (pas de texte séparé à tenir à jour) ;
    - le statut « Envoyé » s'obtient par le bouton « Marquer comme envoyé » (pas d'email) ;
    - seul un brouillon peut être supprimé ; Paramètres › Devis et factures a un « Délai de réalisation » par défaut.
-4. **Factures et paiements** : émission verrouillée, paiement total ou partiel, retard, annulation, PDF et Word.
+4. **Factures et paiements** ✅ : émission verrouillée, paiement total ou partiel, retard, annulation, PDF et Word, conversion devis → facture.
+
+   Choix de réalisation :
+   - même éditeur que les devis (traits `EditsDocumentHeader`, `EditsDocumentLines`, `EditsDocumentLayout` et partials `livewire/partials/editor`) ;
+   - statuts enregistrés : brouillon, émise, annulée ; « Partiellement payée », « Payée » et « En retard » sont calculés (colonne `amount_paid` tenue à jour par les paiements) ;
+   - l'échéance d'une nouvelle facture suit le délai de paiement du client ;
+   - une facture avec des paiements ne peut pas être annulée (supprimer d'abord les paiements) ; un paiement ne dépasse jamais le reste à payer ;
+   - le PDF montre « Déjà payé » et le solde exigible après un paiement ; « ANNULÉE » en filigrane pour une facture annulée ;
+   - la signature du client n'apparaît pas par défaut sur une facture (comme le prototype) ; la mise en page des factures a son propre modèle.
 5. **Tableau de bord et finitions** :
    - indicateurs et graphique du CA sur 12 mois ;
    - `backup:run` planifié chaque jour ;

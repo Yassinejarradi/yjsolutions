@@ -3,6 +3,7 @@
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentLogoController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\Settings\CompanySettingsController;
@@ -35,6 +36,21 @@ Route::middleware('auth')->group(function () {
         Route::patch('accepter', 'accept')->name('accept');
         Route::patch('refuser', 'refuse')->name('refuse');
     });
+
+    // Factures : /factures, /factures/nouveau, /factures/12 (éditeur si brouillon, lecture sinon)
+    Route::resource('factures', InvoiceController::class)
+        ->only(['index', 'create', 'show', 'destroy'])
+        ->parameters(['factures' => 'invoice'])
+        ->names('invoices');
+    Route::prefix('factures/{invoice}')->name('invoices.')->controller(InvoiceController::class)->group(function () {
+        Route::get('pdf', 'pdf')->name('pdf');
+        Route::get('word', 'word')->name('word');
+        Route::post('dupliquer', 'duplicate')->name('duplicate');
+        Route::patch('annuler', 'cancel')->name('cancel');
+        Route::post('paiements', 'storePayment')->name('payments.store');
+        Route::delete('paiements/{payment}', 'destroyPayment')->name('payments.destroy')->scopeBindings();
+    });
+    Route::post('devis/{quote}/convertir', [InvoiceController::class, 'fromQuote'])->name('quotes.convert');
 
     // Logos propres à un document (nom aléatoire, jamais choisi par l'utilisateur).
     Route::get('logos-documents/{file}', DocumentLogoController::class)

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Client de JY Solutions.
@@ -104,14 +105,29 @@ class Client extends Model
         return $this->hasMany(Quote::class);
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     /**
      * Le client a-t-il des devis ou des factures ? Si oui, il ne peut être qu'archivé.
-     *
-     * Phase 4 : ajouter || $this->invoices()->exists().
      */
     public function hasDocuments(): bool
     {
-        return $this->quotes()->exists();
+        return $this->quotes()->exists() || $this->invoices()->exists();
+    }
+
+    /** Total TTC des factures émises (hors brouillons et factures annulées), en centimes. */
+    public function billedTotal(): int
+    {
+        return (int) $this->invoices()->billed()->sum('total_ttc');
+    }
+
+    /** Reste à payer sur les factures émises, en centimes. */
+    public function outstandingBalance(): int
+    {
+        return (int) $this->invoices()->billed()->sum(DB::raw('total_ttc - amount_paid'));
     }
 
     /**

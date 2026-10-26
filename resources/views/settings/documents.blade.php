@@ -66,28 +66,31 @@
         <button type="submit" class="btn-primary px-8 py-3 text-lg">Enregistrer</button>
     </form>
 
-    <section class="card mt-8">
-        <h2 class="card-title">Mise en page des devis</h2>
-        <p class="-mt-3 mb-4 text-lg">
-            @if (! empty($setting->document_layouts['quote']))
-                <span class="font-semibold text-brand">Personnalisée.</span>
-                Les nouveaux devis reprennent la mise en page enregistrée depuis un devis.
-            @else
-                <span class="font-semibold">D’origine.</span>
-                Les nouveaux devis ont la mise en page du modèle JY Solutions.
+    @foreach (['quote' => ['devis', 'un devis brouillon'], 'invoice' => ['factures', 'une facture brouillon']] as $type => [$plural, $example])
+        @php($custom = ! empty($setting->document_layouts[$type]))
+        <section class="card mt-8">
+            <h2 class="card-title">Mise en page des {{ $plural }}</h2>
+            <p class="-mt-3 mb-4 text-lg">
+                @if ($custom)
+                    <span class="font-semibold text-brand">Personnalisée.</span>
+                    Les nouveaux {{ $plural }} reprennent la mise en page enregistrée depuis l’éditeur.
+                @else
+                    <span class="font-semibold">D’origine.</span>
+                    Les nouveaux {{ $plural }} ont la mise en page du modèle JY Solutions.
+                @endif
+            </p>
+            <p class="mb-5 text-muted">
+                Pour la modifier : ouvrez {{ $example }}, changez le logo, les textes ou les éléments affichés,
+                puis dans « Mise en page » cliquez sur « Utiliser pour les prochains {{ $plural }} ».
+            </p>
+            @if ($custom)
+                <form method="POST" action="{{ route('settings.documents.layout.reset', $type) }}"
+                      onsubmit="return confirm(@js('Revenir à la mise en page d’origine pour les prochains '.$plural.' ?'))">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn-secondary">Rétablir la mise en page d’origine</button>
+                </form>
             @endif
-        </p>
-        <p class="mb-5 text-muted">
-            Pour la modifier : ouvrez un devis brouillon, changez le logo, les textes ou les éléments affichés,
-            puis dans « Mise en page » cliquez sur « Utiliser pour les prochains devis ».
-        </p>
-        @if (! empty($setting->document_layouts['quote']))
-            <form method="POST" action="{{ route('settings.documents.layout.reset', 'quote') }}"
-                  onsubmit="return confirm('Revenir à la mise en page d’origine pour les prochains devis ?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn-secondary">Rétablir la mise en page d’origine</button>
-            </form>
-        @endif
-    </section>
+        </section>
+    @endforeach
 </x-app-layout>

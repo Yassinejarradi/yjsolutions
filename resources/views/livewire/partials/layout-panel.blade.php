@@ -1,7 +1,7 @@
 {{--
     Panneau « Mise en page » de l'éditeur (devis, et facture en phase 4) : logo, éléments affichés,
     informations de la société sur ce document, modèle des prochains documents.
-    Variables : $layout, $logoUrl, $layoutMessage, $documentLabel (« devis », « factures »).
+    Variables : $layout, $logoUrl, $layoutMessage, $documentType (« quote », « invoice »), $documentLabel (« devis », « factures »).
 --}}
 @php
     use App\Support\DocumentLayout;
@@ -78,7 +78,7 @@
             <section>
                 <h3 class="mb-3 text-lg font-bold">Éléments affichés</h3>
                 <div class="space-y-2">
-                    @foreach (DocumentLayout::BLOCKS as $block => $label)
+                    @foreach (DocumentLayout::blocks($documentType) as $block => $label)
                         <label class="flex items-center gap-3 rounded-lg px-2 py-1.5 text-lg hover:bg-brand-soft">
                             <input type="checkbox" wire:model.live="layout.show.{{ $block }}" class="h-5 w-5 rounded border-line text-brand focus:ring-brand">
                             {{ $label }}

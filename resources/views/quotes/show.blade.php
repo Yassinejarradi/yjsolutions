@@ -24,7 +24,17 @@
     </x-slot>
 
     <div class="mb-6 flex flex-wrap gap-2">
-        <a href="{{ route('quotes.pdf', $quote) }}" target="_blank" class="btn-primary">Voir le PDF</a>
+        @if ($quote->invoice)
+            <a href="{{ route('invoices.show', $quote->invoice) }}" class="btn-primary">
+                Voir la facture {{ $quote->invoice->number ?? '(brouillon)' }}
+            </a>
+        @elseif ($quote->canBeInvoiced())
+            <form method="POST" action="{{ route('quotes.convert', $quote) }}">
+                @csrf
+                <button type="submit" class="btn-primary">Convertir en facture</button>
+            </form>
+        @endif
+        <a href="{{ route('quotes.pdf', $quote) }}" target="_blank" class="btn-secondary">Voir le PDF</a>
         <a href="{{ route('quotes.word', $quote) }}" class="btn-secondary">Télécharger Word</a>
         <form method="POST" action="{{ route('quotes.duplicate', $quote) }}">
             @csrf

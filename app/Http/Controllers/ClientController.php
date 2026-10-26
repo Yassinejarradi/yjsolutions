@@ -36,6 +36,7 @@ class ClientController extends Controller
         return view('clients.show', [
             'client' => $client,
             'quotes' => $client->quotes()->orderByDesc('issue_date')->orderByDesc('id')->get(),
+            'invoices' => $client->invoices()->orderByDesc('issue_date')->orderByDesc('id')->get(),
         ]);
     }
 

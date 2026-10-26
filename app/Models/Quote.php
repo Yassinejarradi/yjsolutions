@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\QuoteStatus;
 use App\Models\Concerns\HasDocumentLines;
+use App\Models\Concerns\HasDocumentSnapshots;
 use App\Support\DocumentLayout;
 use Database\Factories\QuoteFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use LogicException;
@@ -34,7 +36,7 @@ use LogicException;
 class Quote extends Model
 {
     /** @use HasFactory<QuoteFactory> */
-    use HasDocumentLines, HasFactory;
+    use HasDocumentLines, HasDocumentSnapshots, HasFactory;
 
     /** Type utilisé pour la table sequences. */
     public const SEQUENCE_TYPE = 'quote';
@@ -70,6 +72,25 @@ class Quote extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    /** Facture créée à partir de ce devis (« Convertir en facture »). */
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
+    public function documentType(): string
+    {
+        return 'quote';
+    }
+
+    /**
+     * Un devis envoyé ou accepté (même expiré) peut devenir une facture, une seule fois.
+     */
+    public function canBeInvoiced(): bool
+    {
+        return in_array($this->status, [QuoteStatus::Sent, QuoteStatus::Accepted], true) && ! $this->invoice()->exists();
     }
 
     /**
@@ -138,7 +159,6 @@ class Quote extends Model
             }
 
             $setting = Setting::current();
-            $layout = $this->resolvedLayout();
             $year = $this->issue_date->year;
 
             // Les lignes vides ne sont pas gardées dans un document émis.
@@ -149,11 +169,7 @@ class Quote extends Model
                 'number' => self::formatNumber($setting->quote_prefix, $year, Sequence::next(self::SEQUENCE_TYPE, $year)),
                 'status' => QuoteStatus::Sent,
                 'sent_at' => now(),
-                'client_snapshot' => $this->client->toSnapshot(),
-                'company_snapshot' => DocumentLayout::company($layout, $setting->toSnapshot()),
-                // Mise en page complète figée, avec une copie du logo : modifier les Paramètres ne la change plus.
-                'layout' => DocumentLayout::freezeLogo($layout),
-            ])->save();
+            ] + $this->snapshotsForIssue($setting))->save();
         });
     }
 
@@ -215,35 +231,6 @@ class Quote extends Model
     public static function formatNumber(string $prefix, int $year, int $number): string
     {
         return $prefix.$year.'-'.str_pad((string) $number, 3, '0', STR_PAD_LEFT);
-    }
-
-    /**
-     * Informations du client imprimées : le snapshot si le devis est envoyé, sinon la fiche client actuelle.
-     */
-    public function clientDetails(): array
-    {
-        return $this->client_snapshot ?? $this->client?->toSnapshot() ?? Client::emptySnapshot();
-    }
-
-    /**
-     * Informations de la société imprimées : le snapshot si le devis est envoyé, sinon les Paramètres actuels.
-     */
-    public function companyDetails(): array
-    {
-        return $this->company_snapshot ?? DocumentLayout::company($this->resolvedLayout(), Setting::current()->toSnapshot());
-    }
-
-    /**
-     * Mise en page complète. Brouillon : origine ← modèle des Paramètres ← changements du devis.
-     * Devis envoyé : celle figée à l'envoi (seulement l'origine pour les devis envoyés avant cette option).
-     */
-    public function resolvedLayout(): array
-    {
-        if ($this->isDraft()) {
-            return DocumentLayout::resolve('quote', $this->layout);
-        }
-
-        return DocumentLayout::sanitize('quote', array_replace_recursive(DocumentLayout::defaults('quote'), $this->layout ?? []));
     }
 
     /**

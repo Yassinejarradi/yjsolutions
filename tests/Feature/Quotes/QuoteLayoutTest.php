@@ -45,7 +45,7 @@ test('les textes modifiés sur la feuille sont imprimés, et seules les différe
         ->call('save')
         ->assertReturned(true);
 
-    expect($this->quote->fresh()->layout)->toBe([
+    expect($this->quote->fresh()->layout)->toEqual([
         'labels' => ['title' => 'PROPOSITION', 'col_description' => 'Prestation', 'due' => 'Montant total'],
     ]);
 

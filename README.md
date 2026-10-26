@@ -62,9 +62,10 @@ Les tests couvrent notamment :
 - la numérotation des devis (sans trou, attribuée à l'envoi, remise à 001 chaque année) ;
 - l'éditeur de devis (lignes, auto-complétion, sauvegarde, envoi) ;
 - la cohérence écran = PDF = Word (mêmes montants et mêmes textes) ;
+- les factures (numérotation, date jamais antérieure à la dernière facture émise, paiements, retard, annulation, conversion d'un devis) ;
 - les clients, les paramètres, les utilisateurs et l'authentification.
 
-## Devis : PDF et Word
+## Devis et factures : PDF et Word
 
 - PDF : [dompdf](https://github.com/dompdf/dompdf), vue [`resources/views/pdf/document.blade.php`](resources/views/pdf/document.blade.php), police Carlito (mêmes dimensions que Calibri, licence libre OFL) dans `resources/fonts/carlito/`. Le cache des polices est dans `storage/fonts/` (doit être accessible en écriture).
 - Word : [PhpWord](https://github.com/PHPOffice/PHPWord), [`App\Support\Word\DocumentWord`](app/Support/Word/DocumentWord.php). L'extension PHP `gd` sert à dessiner le filigrane « BROUILLON ».
