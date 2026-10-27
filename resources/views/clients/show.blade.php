@@ -17,7 +17,8 @@
     <x-slot name="header">
         <div class="min-w-0">
             <a href="{{ route('clients.index') }}" class="btn-link">← Tous les clients</a>
-            <h1 class="mt-2 text-3xl font-bold">
+            <h1 class="mt-3 flex flex-wrap items-center gap-4 text-3xl font-extrabold">
+                <x-avatar :name="$client->name" size="lg" />
                 {{ $client->name }}
                 @if ($client->isArchived())
                     <span class="ml-2 align-middle rounded bg-desk px-2 py-1 text-base font-semibold text-muted">Archivé</span>
@@ -99,14 +100,14 @@
                             @php($status = $quote->displayStatus())
                             <li>
                                 <a href="{{ route('quotes.show', $quote) }}"
-                                   class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3 hover:bg-brand-soft sm:px-7">
+                                   class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3 list-row sm:px-7">
                                     <span>
                                         <span class="font-semibold {{ $quote->number ? 'text-accent' : 'italic text-muted' }}">{{ $quote->number ?? 'Brouillon' }}</span>
                                         <span class="text-muted">· {{ $quote->issue_date->format('d/m/Y') }}</span>
                                     </span>
                                     <span class="flex items-center gap-3">
                                         <span class="font-semibold tabular-nums">{{ Money::format($quote->total_ttc, true) }}</span>
-                                        <span class="rounded px-2 py-0.5 text-sm font-semibold {{ $status->badgeClasses() }}">{{ $status->label() }}</span>
+                                        <x-badge :status="$status" />
                                     </span>
                                 </a>
                             </li>
@@ -131,14 +132,14 @@
                             @php($status = $invoice->displayStatus())
                             <li>
                                 <a href="{{ route('invoices.show', $invoice) }}"
-                                   class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3 hover:bg-brand-soft sm:px-7">
+                                   class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3 list-row sm:px-7">
                                     <span>
                                         <span class="font-semibold {{ $invoice->number ? 'text-accent' : 'italic text-muted' }}">{{ $invoice->number ?? 'Brouillon' }}</span>
                                         <span class="text-muted">· {{ $invoice->issue_date->format('d/m/Y') }}</span>
                                     </span>
                                     <span class="flex items-center gap-3">
                                         <span class="font-semibold tabular-nums">{{ Money::format($invoice->total_ttc, true) }}</span>
-                                        <span class="rounded px-2 py-0.5 text-sm font-semibold {{ $status->badgeClasses() }}">{{ $status->label() }}</span>
+                                        <x-badge :status="$status" />
                                     </span>
                                 </a>
                             </li>

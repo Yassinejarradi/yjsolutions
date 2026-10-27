@@ -13,7 +13,7 @@
             <a href="{{ route('invoices.index') }}" class="btn-link">← Toutes les factures</a>
             <h1 class="mt-2 flex flex-wrap items-center gap-3 text-3xl font-bold">
                 Facture {{ $invoice->number }}
-                <span class="rounded px-2.5 py-1 text-base font-semibold {{ $status->badgeClasses() }}">{{ $status->label() }}</span>
+                <x-badge :status="$status" size="lg" />
             </h1>
             <p class="mt-1 text-lg text-muted">
                 @if ($invoice->client)

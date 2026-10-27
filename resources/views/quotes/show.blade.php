@@ -11,7 +11,7 @@
             <a href="{{ route('quotes.index') }}" class="btn-link">← Tous les devis</a>
             <h1 class="mt-2 flex flex-wrap items-center gap-3 text-3xl font-bold">
                 Devis {{ $quote->number }}
-                <span class="rounded px-2.5 py-1 text-base font-semibold {{ $status->badgeClasses() }}">{{ $status->label() }}</span>
+                <x-badge :status="$status" size="lg" />
             </h1>
             <p class="mt-1 text-lg text-muted">
                 @if ($quote->client)

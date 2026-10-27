@@ -31,12 +31,25 @@ enum InvoiceStatus: string
     public function badgeClasses(): string
     {
         return match ($this) {
-            self::Draft => 'bg-desk text-ink',
-            self::Issued => 'bg-brand-soft text-brand',
-            self::PartiallyPaid => 'bg-amber-100 text-amber-800',
-            self::Paid => 'bg-green-100 text-green-800',
-            self::Overdue => 'bg-red-100 text-red-800',
-            self::Cancelled => 'bg-gray-200 text-gray-600 line-through',
+            self::Draft => 'bg-slate-100 text-slate-700 ring-slate-500/20',
+            self::Issued => 'bg-blue-50 text-blue-700 ring-blue-600/20',
+            self::PartiallyPaid => 'bg-amber-50 text-amber-800 ring-amber-600/25',
+            self::Paid => 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+            self::Overdue => 'bg-red-50 text-red-700 ring-red-600/20',
+            self::Cancelled => 'bg-slate-100 text-slate-500 ring-slate-400/30 line-through',
+        };
+    }
+
+    /** Couleur de la pastille devant le libellé du statut. */
+    public function dotClass(): string
+    {
+        return match ($this) {
+            self::Draft => 'bg-slate-400',
+            self::Issued => 'bg-blue-500',
+            self::PartiallyPaid => 'bg-amber-500',
+            self::Paid => 'bg-emerald-500',
+            self::Overdue => 'bg-red-500',
+            self::Cancelled => 'bg-slate-400',
         };
     }
 }

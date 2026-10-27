@@ -66,7 +66,7 @@
         </div>
     </div>
 
-    <div class="card p-0 sm:p-0" wire:loading.class="opacity-60">
+    <div class="card overflow-hidden p-0 sm:p-0" wire:loading.class="opacity-60">
         @if ($invoices->isEmpty())
             <p class="px-5 py-10 text-center text-lg text-muted sm:px-7">
                 @if ($filtered)
@@ -77,7 +77,7 @@
             </p>
         @else
             {{-- En-têtes (ordinateur et tablette) --}}
-            <div class="hidden grid-cols-[7.5rem_minmax(0,1fr)_5.5rem_7.5rem_7.5rem_9rem] gap-3 border-b border-line px-7 py-3 text-sm font-semibold uppercase tracking-wide text-muted md:grid">
+            <div class="hidden grid-cols-[7.5rem_minmax(0,1fr)_5.5rem_7.5rem_7.5rem_9rem] gap-3 rounded-t-2xl border-b border-line bg-slate-50/80 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-muted md:grid">
                 <span>Numéro</span><span>Client</span><span>Échéance</span><span class="text-right">Total TTC</span><span class="text-right">Reste à payer</span><span>Statut</span>
             </div>
             <ul class="divide-y divide-line">
@@ -85,7 +85,7 @@
                     @php($status = $invoice->displayStatus())
                     <li wire:key="invoice-{{ $invoice->id }}">
                         <a href="{{ route('invoices.show', $invoice) }}"
-                           class="grid grid-cols-2 gap-x-3 gap-y-1 px-5 py-4 hover:bg-brand-soft md:grid-cols-[7.5rem_minmax(0,1fr)_5.5rem_7.5rem_7.5rem_9rem] md:items-center md:px-7">
+                           class="grid grid-cols-2 gap-x-3 gap-y-1 px-5 py-4 list-row md:grid-cols-[7.5rem_minmax(0,1fr)_5.5rem_7.5rem_7.5rem_9rem] md:items-center md:px-7">
                             <span class="font-semibold {{ $invoice->number ? 'text-accent' : 'italic text-muted' }}">{{ $invoice->number ?? 'Brouillon' }}</span>
                             <span class="order-3 col-span-2 truncate text-lg font-semibold md:order-none md:col-span-1">
                                 {{ $invoice->clientDetails()['name'] ?: 'Client à choisir' }}
@@ -102,7 +102,7 @@
                                 @endif
                             </span>
                             <span class="order-2 text-right md:order-none md:text-left">
-                                <span class="rounded px-2 py-0.5 text-sm font-semibold {{ $status->badgeClasses() }}">{{ $status->label() }}</span>
+                                <x-badge :status="$status" />
                             </span>
                         </a>
                     </li>

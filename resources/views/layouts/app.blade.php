@@ -14,7 +14,7 @@
 <body x-data="{ menuOpen: false }" @keydown.escape.window="menuOpen = false">
 
     {{-- Barre du haut, seulement sur téléphone et tablette --}}
-    <div class="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-white px-4 py-3 lg:hidden">
+    <div class="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/70 bg-white/85 px-4 py-3 backdrop-blur-md lg:hidden">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
             <img src="{{ route('logo') }}" alt="" class="h-10 w-auto">
             <span class="text-lg font-bold">JY Solutions</span>
@@ -26,7 +26,7 @@
     </div>
 
     {{-- Fond sombre derrière le menu ouvert sur téléphone --}}
-    <div x-cloak x-show="menuOpen" x-transition.opacity class="fixed inset-0 z-40 bg-ink/50 lg:hidden" @click="menuOpen = false"></div>
+    <div x-cloak x-show="menuOpen" x-transition.opacity class="fixed inset-0 z-40 bg-navy-deep/60 backdrop-blur-sm lg:hidden" @click="menuOpen = false"></div>
 
     @include('layouts.sidebar')
 
@@ -37,7 +37,7 @@
                     {{ $header }}
                 </div>
             @elseif ($title)
-                <h1 class="mb-8 text-3xl font-bold">{{ $title }}</h1>
+                <h1 class="mb-8 text-3xl font-extrabold text-ink sm:text-4xl">{{ $title }}</h1>
             @endisset
 
             <x-flash />

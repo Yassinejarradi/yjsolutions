@@ -6,7 +6,7 @@
         <a href="{{ route('settings.users.create') }}" class="btn-primary">+ Nouvel utilisateur</a>
     </div>
 
-    <div class="card p-0 sm:p-0">
+    <div class="card overflow-hidden p-0 sm:p-0">
         <ul class="divide-y divide-line">
             @foreach ($users as $user)
                 <li class="flex flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-7">

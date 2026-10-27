@@ -11,45 +11,63 @@
 @endphp
 
 <aside id="sidebar"
-       class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col border-r border-line bg-white transition-transform duration-200 lg:translate-x-0"
+       class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col overflow-hidden bg-sidebar-gradient text-white shadow-2xl transition-transform duration-200 lg:translate-x-0 lg:shadow-none"
        :class="{ '-translate-x-full': !menuOpen, 'translate-x-0': menuOpen }"
        aria-label="Menu principal">
 
-    <div class="flex items-center justify-between border-b border-line px-6 py-5">
+    {{-- Halo décoratif --}}
+    <div class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand/40 blur-3xl" aria-hidden="true"></div>
+
+    <div class="relative flex items-center justify-between px-6 pb-6 pt-7">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
-            <img src="{{ route('logo') }}" alt="JY Solutions" class="h-14 w-auto">
-            <span class="text-lg font-bold leading-tight">JY Solutions<br><span class="text-sm font-normal text-muted">Gestion</span></span>
+            <span class="rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-white/20">
+                <img src="{{ route('logo') }}" alt="JY Solutions" class="h-12 w-auto">
+            </span>
+            <span class="text-lg font-bold leading-tight">JY Solutions<br><span class="text-sm font-medium text-white/60">Gestion</span></span>
         </a>
-        <button type="button" class="btn-secondary px-3 py-1.5 text-sm lg:hidden" @click="menuOpen = false">Fermer</button>
+        <button type="button" class="rounded-lg bg-white/10 px-3 py-1.5 text-sm font-semibold hover:bg-white/20 lg:hidden" @click="menuOpen = false">Fermer</button>
     </div>
 
-    <nav class="flex-1 space-y-1 overflow-y-auto px-4 py-6">
+    <nav class="relative flex-1 space-y-1.5 overflow-y-auto px-4 py-4">
+        <p class="px-4 pb-2 text-xs font-semibold uppercase tracking-widest text-white/40">Menu</p>
         @foreach ($items as $item)
             @continue(! Route::has($item['route']))
             @php($active = request()->routeIs($item['active']))
             <a href="{{ route($item['route']) }}"
                @class([
-                   'flex items-center gap-4 rounded-lg px-4 py-3 text-lg font-semibold transition',
-                   'bg-brand text-white' => $active,
-                   'text-ink hover:bg-brand-soft hover:text-brand' => ! $active,
+                   'group flex items-center gap-4 rounded-xl px-4 py-3 text-lg font-semibold transition',
+                   'bg-white text-brand shadow-lg shadow-navy-deep/30' => $active,
+                   'text-white/80 hover:bg-white/10 hover:text-white' => ! $active,
                ])
                @if ($active) aria-current="page" @endif>
-                <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
-                </svg>
+                <span @class([
+                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition',
+                    'bg-brand-soft text-brand' => $active,
+                    'bg-white/10 text-white group-hover:bg-white/15' => ! $active,
+                ])>
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
+                    </svg>
+                </span>
                 {{ $item['label'] }}
             </a>
         @endforeach
     </nav>
 
-    <div class="border-t border-line px-6 py-5">
-        <p class="font-semibold">{{ auth()->user()->name }}</p>
-        <p class="mb-4 truncate text-sm text-muted">{{ auth()->user()->email }}</p>
-        <div class="flex flex-wrap gap-2">
-            <a href="{{ route('profile.edit') }}" class="btn-secondary px-4 py-2 text-sm">Mon profil</a>
+    @php($user = auth()->user())
+    <div class="relative m-4 rounded-2xl bg-white/[0.07] p-4 ring-1 ring-white/10">
+        <div class="mb-4 flex items-center gap-3">
+            <x-avatar :name="$user->name" class="ring-2 ring-white/20" />
+            <span class="min-w-0">
+                <span class="block truncate font-semibold">{{ $user->name }}</span>
+                <span class="block truncate text-sm text-white/60">{{ $user->email }}</span>
+            </span>
+        </div>
+        <div class="grid gap-2">
+            <a href="{{ route('profile.edit') }}" class="rounded-lg bg-white/10 px-3 py-2 text-center text-sm font-semibold transition hover:bg-white/20">Mon profil</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="btn-secondary px-4 py-2 text-sm">Se déconnecter</button>
+                <button type="submit" class="w-full rounded-lg bg-white/10 px-3 py-2 text-sm font-semibold transition hover:bg-white/20">Se déconnecter</button>
             </form>
         </div>
     </div>

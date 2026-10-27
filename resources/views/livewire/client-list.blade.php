@@ -30,7 +30,7 @@
         </div>
     </div>
 
-    <div class="card p-0 sm:p-0" wire:loading.class="opacity-60">
+    <div class="card overflow-hidden p-0 sm:p-0" wire:loading.class="opacity-60">
         @if ($clients->isEmpty())
             <p class="px-5 py-10 text-center text-lg text-muted sm:px-7">
                 @if (trim($search) !== '')
@@ -46,14 +46,17 @@
                 @foreach ($clients as $client)
                     <li wire:key="client-{{ $client->id }}">
                         <a href="{{ route('clients.show', $client) }}"
-                           class="flex flex-col gap-1 px-5 py-4 hover:bg-brand-soft sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-7">
-                            <div class="min-w-0">
-                                <p class="text-lg font-semibold text-ink">{{ $client->name }}</p>
-                                <p class="text-muted">
-                                    {{ collect([$client->city, $client->ice ? 'ICE '.$client->ice : null])->filter()->implode(' · ') ?: '—' }}
-                                </p>
+                           class="list-row flex flex-col gap-1 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-7">
+                            <div class="flex min-w-0 items-center gap-4">
+                                <x-avatar :name="$client->name" />
+                                <div class="min-w-0">
+                                    <p class="text-lg font-semibold text-ink">{{ $client->name }}</p>
+                                    <p class="text-muted">
+                                        {{ collect([$client->city, $client->ice ? 'ICE '.$client->ice : null])->filter()->implode(' · ') ?: '—' }}
+                                    </p>
+                                </div>
                             </div>
-                            <div class="text-muted sm:text-right">
+                            <div class="pl-[3.75rem] text-muted sm:pl-0 sm:text-right">
                                 <p>{{ collect([$client->contact_name, $client->phone])->filter()->implode(' · ') }}</p>
                             </div>
                         </a>

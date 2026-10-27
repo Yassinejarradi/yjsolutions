@@ -29,11 +29,23 @@ enum QuoteStatus: string
     public function badgeClasses(): string
     {
         return match ($this) {
-            self::Draft => 'bg-desk text-ink',
-            self::Sent => 'bg-brand-soft text-brand',
-            self::Accepted => 'bg-green-100 text-green-800',
-            self::Refused => 'bg-red-100 text-red-800',
-            self::Expired => 'bg-amber-100 text-amber-800',
+            self::Draft => 'bg-slate-100 text-slate-700 ring-slate-500/20',
+            self::Sent => 'bg-blue-50 text-blue-700 ring-blue-600/20',
+            self::Accepted => 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+            self::Refused => 'bg-red-50 text-red-700 ring-red-600/20',
+            self::Expired => 'bg-amber-50 text-amber-800 ring-amber-600/25',
+        };
+    }
+
+    /** Couleur de la pastille devant le libellé du statut. */
+    public function dotClass(): string
+    {
+        return match ($this) {
+            self::Draft => 'bg-slate-400',
+            self::Sent => 'bg-blue-500',
+            self::Accepted => 'bg-emerald-500',
+            self::Refused => 'bg-red-500',
+            self::Expired => 'bg-amber-500',
         };
     }
 }

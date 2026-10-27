@@ -9,6 +9,7 @@ Référence : [docs/PLAN.md](docs/PLAN.md) (périmètre validé, phases). Le cah
 ## Stack et commandes
 
 Laravel 12, Livewire 4, Blade, Tailwind 3, Pest, brick/math. SQLite en local, MySQL 8 en production.
+Design : police Inter (paquet npm, aucun appel externe), couleurs et ombres dans `tailwind.config.js`, composants `.btn-*`, `.card`, `.field-*` dans `resources/css/app.css`, et `x-avatar`, `x-badge`, `x-flash`. Les documents (feuille A4, PDF, Word) gardent Calibri / Carlito.
 Composants Livewire **en classe** (`app/Livewire` + `resources/views/livewire`, réglé dans `config/livewire.php`), pas en fichier unique.
 Après avoir ajouté des classes Tailwind dans une vue : `npm run build`, sinon le CSS publié ne les contient pas. Tailwind ne lit en PHP que `app/Enums` (couleurs des statuts).
 

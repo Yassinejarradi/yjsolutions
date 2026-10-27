@@ -1,7 +1,7 @@
 {{-- Barre d'actions de l'éditeur. Variables : $documentId, $routePrefix (quotes, invoices), $newDocumentHint,
      $sendLabel, $sendConfirm, $sendAction (send, issue). --}}
 {{-- Barre d'actions : reste visible en haut de l'écran --}}
-<div class="sticky top-[4.6rem] z-20 -mx-4 mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-line bg-desk/95 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-8 lg:top-0">
+<div class="sticky top-[4.6rem] z-20 -mx-4 mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/70 bg-desk/80 px-4 py-3 backdrop-blur-md sm:-mx-8 sm:px-8 lg:top-0">
     <div class="flex flex-wrap items-center gap-3">
         <span class="rounded bg-white px-2.5 py-1 text-sm font-bold uppercase tracking-wide text-muted ring-1 ring-line">Brouillon</span>
         <span class="text-muted" aria-live="polite">
