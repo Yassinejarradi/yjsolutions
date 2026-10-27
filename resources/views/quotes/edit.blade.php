@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <a href="{{ route('quotes.index') }}" class="btn-link">← Tous les devis</a>
-            <h1 class="mt-2 text-3xl font-bold">{{ $quote ? 'Devis brouillon' : 'Nouveau devis' }}</h1>
+            <h1 class="mt-2 text-2xl font-bold">{{ $quote ? 'Devis brouillon' : 'Nouveau devis' }}</h1>
         </div>
 
         @if ($quote)

@@ -25,7 +25,7 @@
             </div>
 
             <div class="relative max-w-md">
-                <h2 class="text-4xl font-extrabold leading-tight">Devis, factures et clients, au même endroit.</h2>
+                <h2 class="text-3xl font-extrabold leading-tight">Devis, factures et clients, au même endroit.</h2>
                 <ul class="mt-8 space-y-4 text-lg text-white/85">
                     @foreach (['Des documents prêts à imprimer, identiques à l’écran et en PDF', 'Les montants et la somme en lettres calculés pour vous', 'Les paiements et les retards suivis automatiquement'] as $point)
                         <li class="flex items-start gap-3">

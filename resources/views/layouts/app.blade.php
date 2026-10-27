@@ -16,8 +16,8 @@
     {{-- Barre du haut, seulement sur téléphone et tablette --}}
     <div class="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/70 bg-white/85 px-4 py-3 backdrop-blur-md lg:hidden">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
-            <img src="{{ route('logo') }}" alt="" class="h-10 w-auto">
-            <span class="text-lg font-bold">JY Solutions</span>
+            <img src="{{ route('logo') }}" alt="" class="h-8 w-auto">
+            <span class="font-bold">JY Solutions</span>
         </a>
         <button type="button" class="btn-secondary px-4 py-2" @click="menuOpen = true" aria-controls="sidebar" :aria-expanded="menuOpen">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
@@ -30,14 +30,14 @@
 
     @include('layouts.sidebar')
 
-    <div class="lg:pl-72">
-        <main class="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
+    <div class="lg:pl-60">
+        <main class="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-7">
             @isset($header)
-                <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+                <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
                     {{ $header }}
                 </div>
             @elseif ($title)
-                <h1 class="mb-8 text-3xl font-extrabold text-ink sm:text-4xl">{{ $title }}</h1>
+                <h1 class="mb-6 text-2xl font-extrabold text-ink sm:text-3xl">{{ $title }}</h1>
             @endisset
 
             <x-flash />

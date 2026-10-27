@@ -77,7 +77,7 @@
             </p>
         @else
             {{-- En-têtes (ordinateur et tablette) --}}
-            <div class="hidden grid-cols-[7.5rem_minmax(0,1fr)_5.5rem_7.5rem_7.5rem_9rem] gap-3 rounded-t-2xl border-b border-line bg-slate-50/80 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-muted md:grid">
+            <div class="hidden grid-cols-[7.5rem_minmax(0,1fr)_6rem_9rem_9rem_8.5rem] gap-3 rounded-t-2xl border-b border-line bg-slate-50/80 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-muted md:grid">
                 <span>Numéro</span><span>Client</span><span>Échéance</span><span class="text-right">Total TTC</span><span class="text-right">Reste à payer</span><span>Statut</span>
             </div>
             <ul class="divide-y divide-line">
@@ -85,7 +85,7 @@
                     @php($status = $invoice->displayStatus())
                     <li wire:key="invoice-{{ $invoice->id }}">
                         <a href="{{ route('invoices.show', $invoice) }}"
-                           class="grid grid-cols-2 gap-x-3 gap-y-1 px-5 py-4 list-row md:grid-cols-[7.5rem_minmax(0,1fr)_5.5rem_7.5rem_7.5rem_9rem] md:items-center md:px-7">
+                           class="grid grid-cols-2 gap-x-3 gap-y-1 px-5 py-4 list-row md:grid-cols-[7.5rem_minmax(0,1fr)_6rem_9rem_9rem_8.5rem] md:items-center md:px-7">
                             <span class="font-semibold {{ $invoice->number ? 'text-accent' : 'italic text-muted' }}">{{ $invoice->number ?? 'Brouillon' }}</span>
                             <span class="order-3 col-span-2 truncate text-lg font-semibold md:order-none md:col-span-1">
                                 {{ $invoice->clientDetails()['name'] ?: 'Client à choisir' }}
@@ -93,8 +93,8 @@
                             <span class="order-4 text-muted md:order-none">
                                 <span class="md:hidden">Échéance </span>{{ $invoice->due_date->format('d/m/Y') }}
                             </span>
-                            <span class="order-5 text-right font-semibold tabular-nums md:order-none">{{ Money::format($invoice->total_ttc, true) }}</span>
-                            <span class="order-6 col-span-2 text-right tabular-nums md:order-none md:col-span-1">
+                            <span class="order-5 whitespace-nowrap text-right font-semibold tabular-nums md:order-none">{{ Money::format($invoice->total_ttc, true) }}</span>
+                            <span class="order-6 col-span-2 whitespace-nowrap text-right tabular-nums md:order-none md:col-span-1">
                                 @if ($invoice->isOpen() && $invoice->balance() > 0)
                                     <span class="md:hidden text-muted">Reste à payer </span><span class="font-semibold text-accent">{{ Money::format($invoice->balance(), true) }}</span>
                                 @else

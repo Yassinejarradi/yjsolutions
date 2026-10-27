@@ -17,7 +17,7 @@
     <x-slot name="header">
         <div class="min-w-0">
             <a href="{{ route('clients.index') }}" class="btn-link">← Tous les clients</a>
-            <h1 class="mt-3 flex flex-wrap items-center gap-4 text-3xl font-extrabold">
+            <h1 class="mt-3 flex flex-wrap items-center gap-4 text-2xl font-extrabold">
                 <x-avatar :name="$client->name" size="lg" />
                 {{ $client->name }}
                 @if ($client->isArchived())
@@ -40,11 +40,11 @@
     <div class="mb-8 grid gap-5 sm:grid-cols-2">
         <div class="card">
             <p class="text-lg text-muted">Total facturé</p>
-            <p class="mt-1 text-3xl font-bold tabular-nums">{{ Money::format($client->billedTotal(), true) }}</p>
+            <p class="mt-1 text-2xl font-bold tabular-nums">{{ Money::format($client->billedTotal(), true) }}</p>
         </div>
         <div class="card">
             <p class="text-lg text-muted">Reste à payer</p>
-            <p @class(['mt-1 text-3xl font-bold tabular-nums', 'text-accent' => $outstanding > 0])>{{ Money::format($outstanding, true) }}</p>
+            <p @class(['mt-1 text-2xl font-bold tabular-nums', 'text-accent' => $outstanding > 0])>{{ Money::format($outstanding, true) }}</p>
         </div>
     </div>
 

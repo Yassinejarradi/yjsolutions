@@ -73,7 +73,7 @@
             </p>
         @else
             {{-- En-têtes (ordinateur et tablette) --}}
-            <div class="hidden grid-cols-[9rem_minmax(0,1fr)_7rem_8.5rem_8rem] gap-4 rounded-t-2xl border-b border-line bg-slate-50/80 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-muted md:grid">
+            <div class="hidden grid-cols-[9rem_minmax(0,1fr)_7rem_9.5rem_8rem] gap-4 rounded-t-2xl border-b border-line bg-slate-50/80 px-7 py-3 text-sm font-semibold uppercase tracking-wide text-muted md:grid">
                 <span>Numéro</span><span>Client</span><span>Date</span><span class="text-right">Total TTC</span><span>Statut</span>
             </div>
             <ul class="divide-y divide-line">
@@ -81,13 +81,13 @@
                     @php($status = $quote->displayStatus())
                     <li wire:key="quote-{{ $quote->id }}">
                         <a href="{{ route('quotes.show', $quote) }}"
-                           class="grid grid-cols-2 gap-x-4 gap-y-1 px-5 py-4 list-row md:grid-cols-[9rem_minmax(0,1fr)_7rem_8.5rem_8rem] md:items-center md:px-7">
+                           class="grid grid-cols-2 gap-x-4 gap-y-1 px-5 py-4 list-row md:grid-cols-[9rem_minmax(0,1fr)_7rem_9.5rem_8rem] md:items-center md:px-7">
                             <span class="font-semibold {{ $quote->number ? 'text-accent' : 'italic text-muted' }}">{{ $quote->number ?? 'Brouillon' }}</span>
                             <span class="order-3 col-span-2 truncate text-lg font-semibold md:order-none md:col-span-1">
                                 {{ $quote->clientDetails()['name'] ?: 'Client à choisir' }}
                             </span>
                             <span class="order-4 text-muted md:order-none">{{ $quote->issue_date->format('d/m/Y') }}</span>
-                            <span class="order-5 text-right font-semibold tabular-nums md:order-none">{{ Money::format($quote->total_ttc, true) }}</span>
+                            <span class="order-5 whitespace-nowrap text-right font-semibold tabular-nums md:order-none">{{ Money::format($quote->total_ttc, true) }}</span>
                             <span class="order-2 text-right md:order-none md:text-left">
                                 <x-badge :status="$status" />
                             </span>

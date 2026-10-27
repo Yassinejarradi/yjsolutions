@@ -12,7 +12,7 @@
         'from-amber-500 to-orange-600', 'from-rose-500 to-pink-600', 'from-violet-500 to-purple-600',
     ];
     $palette = $palettes[crc32((string) $name) % count($palettes)];
-    $sizes = ['sm' => 'h-9 w-9 text-sm', 'md' => 'h-11 w-11 text-base', 'lg' => 'h-14 w-14 text-xl'];
+    $sizes = ['sm' => 'h-8 w-8 text-xs', 'md' => 'h-10 w-10 text-sm', 'lg' => 'h-12 w-12 text-lg'];
 @endphp
 
 <span {{ $attributes->merge(['class' => "avatar bg-gradient-to-br text-white shadow-sm $palette ".($sizes[$size] ?? $sizes['md'])]) }} aria-hidden="true">{{ $initials }}</span>

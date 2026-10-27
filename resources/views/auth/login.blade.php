@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <h1 class="text-3xl font-extrabold">Connexion</h1>
+    <h1 class="text-2xl font-extrabold">Connexion</h1>
     <p class="mb-8 mt-2 text-lg text-muted">Connectez-vous pour accéder à vos devis et factures.</p>
 
     <form method="POST" action="{{ route('login') }}" class="space-y-5">

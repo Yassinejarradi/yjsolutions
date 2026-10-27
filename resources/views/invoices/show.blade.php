@@ -11,7 +11,7 @@
     <x-slot name="header">
         <div>
             <a href="{{ route('invoices.index') }}" class="btn-link">← Toutes les factures</a>
-            <h1 class="mt-2 flex flex-wrap items-center gap-3 text-3xl font-bold">
+            <h1 class="mt-2 flex flex-wrap items-center gap-3 text-2xl font-bold">
                 Facture {{ $invoice->number }}
                 <x-badge :status="$status" size="lg" />
             </h1>

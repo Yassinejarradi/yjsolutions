@@ -1,18 +1,8 @@
 @php
-    use App\Support\Money;
-
     $hour = now()->hour;
     $greeting = $hour < 18 ? 'Bonjour' : 'Bonsoir';
 
     $stats = [
-        [
-            'label' => 'Reste à encaisser',
-            'value' => Money::format($outstanding, true),
-            'hint' => 'sur les factures émises',
-            'url' => route('invoices.index'),
-            'tone' => 'from-brand-light to-brand',
-            'icon' => 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z',
-        ],
         [
             'label' => 'Factures en retard',
             'value' => $overdueCount,
@@ -41,15 +31,15 @@
 
 <x-app-layout title="Tableau de bord">
     <x-slot name="header">
-        <div class="relative w-full overflow-hidden rounded-3xl bg-brand-gradient px-6 py-8 text-white shadow-lift sm:px-10 sm:py-10">
-            <div class="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10 blur-2xl" aria-hidden="true"></div>
+        <div class="relative w-full overflow-hidden rounded-2xl bg-brand-gradient px-5 py-5 text-white shadow-lift sm:px-7 sm:py-6">
+            <div class="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-white/10 blur-2xl" aria-hidden="true"></div>
             <div class="pointer-events-none absolute -bottom-24 right-1/3 h-56 w-56 rounded-full bg-accent/25 blur-3xl" aria-hidden="true"></div>
 
-            <div class="relative flex flex-wrap items-end justify-between gap-6">
+            <div class="relative flex flex-wrap items-end justify-between gap-4">
                 <div>
-                    <p class="text-lg font-medium capitalize text-white/70">{{ now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</p>
-                    <h1 class="mt-1 text-3xl font-extrabold sm:text-4xl">{{ $greeting }} {{ auth()->user()->name }}</h1>
-                    <p class="mt-2 max-w-xl text-lg text-white/80">Que voulez-vous faire aujourd’hui&nbsp;?</p>
+                    <p class="text-sm font-medium capitalize text-white/70">{{ now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</p>
+                    <h1 class="mt-0.5 text-2xl font-extrabold">{{ $greeting }} {{ auth()->user()->name }}</h1>
+                    <p class="mt-1 max-w-xl text-white/80">Que voulez-vous faire aujourd’hui&nbsp;?</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
                     <a href="{{ route('quotes.create') }}" class="btn bg-white text-brand shadow-lg hover:bg-brand-soft">+ Nouveau devis</a>
@@ -60,16 +50,16 @@
     </x-slot>
 
     {{-- À suivre --}}
-    <h2 class="mb-4 text-xl font-bold">À suivre</h2>
-    <div class="mb-10 grid gap-5 sm:grid-cols-3">
+    <h2 class="mb-3 text-lg font-bold">À suivre</h2>
+    <div class="mb-8 grid gap-4 sm:grid-cols-2">
         @foreach ($stats as $stat)
             <a href="{{ $stat['url'] }}" class="card group flex items-start gap-4 transition hover:-translate-y-0.5 hover:shadow-lift">
-                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-md {{ $stat['tone'] }}">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $stat['icon'] }}" /></svg>
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-md {{ $stat['tone'] }}">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $stat['icon'] }}" /></svg>
                 </span>
                 <span class="min-w-0">
                     <span class="block text-muted">{{ $stat['label'] }}</span>
-                    <span class="block truncate text-2xl font-extrabold tabular-nums text-ink">{{ $stat['value'] }}</span>
+                    <span class="block truncate text-xl font-extrabold tabular-nums text-ink">{{ $stat['value'] }}</span>
                     <span class="block text-sm text-muted">{{ $stat['hint'] }}</span>
                 </span>
             </a>
@@ -77,16 +67,16 @@
     </div>
 
     {{-- Actions rapides --}}
-    <h2 class="mb-4 text-xl font-bold">Actions rapides</h2>
-    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    <h2 class="mb-3 text-lg font-bold">Actions rapides</h2>
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         @foreach ($actions as $action)
-            <a href="{{ $action['url'] }}" class="card group flex flex-col gap-4 transition hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-lift">
-                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-soft text-brand transition group-hover:bg-brand group-hover:text-white">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $action['icon'] }}" /></svg>
+            <a href="{{ $action['url'] }}" class="card group flex flex-col gap-3 transition hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-lift">
+                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand transition group-hover:bg-brand group-hover:text-white">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $action['icon'] }}" /></svg>
                 </span>
                 <span>
-                    <span class="block text-lg font-bold text-ink">{{ $action['label'] }}</span>
-                    <span class="mt-1 block text-muted">{{ $action['text'] }}</span>
+                    <span class="block font-bold text-ink">{{ $action['label'] }}</span>
+                    <span class="mt-0.5 block text-sm text-muted">{{ $action['text'] }}</span>
                 </span>
                 <span class="mt-auto text-sm font-semibold text-brand">Ouvrir →</span>
             </a>

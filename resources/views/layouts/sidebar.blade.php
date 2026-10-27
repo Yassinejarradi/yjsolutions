@@ -11,37 +11,37 @@
 @endphp
 
 <aside id="sidebar"
-       class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col overflow-hidden bg-sidebar-gradient text-white shadow-2xl transition-transform duration-200 lg:translate-x-0 lg:shadow-none"
+       class="fixed inset-y-0 left-0 z-50 flex w-60 -translate-x-full flex-col overflow-hidden bg-sidebar-gradient text-white shadow-2xl transition-transform duration-200 lg:translate-x-0 lg:shadow-none"
        :class="{ '-translate-x-full': !menuOpen, 'translate-x-0': menuOpen }"
        aria-label="Menu principal">
 
     {{-- Halo décoratif --}}
     <div class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand/40 blur-3xl" aria-hidden="true"></div>
 
-    <div class="relative flex items-center justify-between px-6 pb-6 pt-7">
+    <div class="relative flex items-center justify-between px-5 pb-4 pt-5">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
-            <span class="rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-white/20">
-                <img src="{{ route('logo') }}" alt="JY Solutions" class="h-12 w-auto">
+            <span class="rounded-xl bg-white p-1 shadow-lg ring-1 ring-white/20">
+                <img src="{{ route('logo') }}" alt="JY Solutions" class="h-9 w-auto">
             </span>
-            <span class="text-lg font-bold leading-tight">JY Solutions<br><span class="text-sm font-medium text-white/60">Gestion</span></span>
+            <span class="font-bold leading-tight">JY Solutions<br><span class="text-sm font-medium text-white/60">Gestion</span></span>
         </a>
         <button type="button" class="rounded-lg bg-white/10 px-3 py-1.5 text-sm font-semibold hover:bg-white/20 lg:hidden" @click="menuOpen = false">Fermer</button>
     </div>
 
-    <nav class="relative flex-1 space-y-1.5 overflow-y-auto px-4 py-4">
-        <p class="px-4 pb-2 text-xs font-semibold uppercase tracking-widest text-white/40">Menu</p>
+    <nav class="relative flex-1 space-y-1 overflow-y-auto px-3 py-3">
+        <p class="px-3 pb-2 text-xs font-semibold uppercase tracking-widest text-white/40">Menu</p>
         @foreach ($items as $item)
             @continue(! Route::has($item['route']))
             @php($active = request()->routeIs($item['active']))
             <a href="{{ route($item['route']) }}"
                @class([
-                   'group flex items-center gap-4 rounded-xl px-4 py-3 text-lg font-semibold transition',
+                   'group flex items-center gap-3 rounded-lg px-3 py-2 font-semibold transition',
                    'bg-white text-brand shadow-lg shadow-navy-deep/30' => $active,
                    'text-white/80 hover:bg-white/10 hover:text-white' => ! $active,
                ])
                @if ($active) aria-current="page" @endif>
                 <span @class([
-                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition',
+                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition',
                     'bg-brand-soft text-brand' => $active,
                     'bg-white/10 text-white group-hover:bg-white/15' => ! $active,
                 ])>
@@ -55,9 +55,9 @@
     </nav>
 
     @php($user = auth()->user())
-    <div class="relative m-4 rounded-2xl bg-white/[0.07] p-4 ring-1 ring-white/10">
-        <div class="mb-4 flex items-center gap-3">
-            <x-avatar :name="$user->name" class="ring-2 ring-white/20" />
+    <div class="relative m-3 rounded-xl bg-white/[0.07] p-3 ring-1 ring-white/10">
+        <div class="mb-3 flex items-center gap-3">
+            <x-avatar :name="$user->name" size="sm" class="ring-2 ring-white/20" />
             <span class="min-w-0">
                 <span class="block truncate font-semibold">{{ $user->name }}</span>
                 <span class="block truncate text-sm text-white/60">{{ $user->email }}</span>

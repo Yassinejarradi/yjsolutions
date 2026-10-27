@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <a href="{{ route('invoices.index') }}" class="btn-link">← Toutes les factures</a>
-            <h1 class="mt-2 text-3xl font-bold">{{ $invoice ? 'Facture brouillon' : 'Nouvelle facture' }}</h1>
+            <h1 class="mt-2 text-2xl font-bold">{{ $invoice ? 'Facture brouillon' : 'Nouvelle facture' }}</h1>
             @if ($invoice?->quote)
                 <p class="mt-1 text-lg text-muted">
                     Créée à partir du devis <a href="{{ route('quotes.show', $invoice->quote) }}" class="btn-link">{{ $invoice->quote->number }}</a>
