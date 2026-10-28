@@ -96,8 +96,17 @@ Plan validé le 26/10/2026, après réduction du périmètre. Le cahier des char
    - une facture avec des paiements ne peut pas être annulée (supprimer d'abord les paiements) ; un paiement ne dépasse jamais le reste à payer ;
    - le PDF montre « Déjà payé » et le solde exigible après un paiement ; « ANNULÉE » en filigrane pour une facture annulée ;
    - la signature du client n'apparaît pas par défaut sur une facture (comme le prototype) ; la mise en page des factures a son propre modèle.
-5. **Tableau de bord et finitions** :
+5. **Tableau de bord et finitions** ✅ :
    - indicateurs et graphique du CA sur 12 mois ;
    - `backup:run` planifié chaque jour ;
    - seeders de démonstration ;
    - README de mise en production (VPS et hébergement mutualisé).
+
+   Choix de réalisation :
+   - CA = total HT des factures émises non annulées, à la date de facture ; « Encaissé » = paiements reçus (TTC), à leur date ; calcul dans `App\Support\Revenue` ;
+   - « Reste à encaisser » retiré du tableau de bord à la demande de l'utilisateur (il reste sur la liste des factures et la fiche client) ;
+   - graphique en HTML/CSS, sans bibliothèque JavaScript, avec un tableau équivalent pour les lecteurs d'écran ;
+   - sauvegarde maison (`App\Support\Backup`) plutôt qu'un paquet : zip avec la base (copie SQLite, ou export SQL en PHP pour MySQL, sans `mysqldump`) et les logos ; 30 gardées ; page Paramètres › Sauvegardes pour en faire une et la télécharger ;
+   - le logo figé dans un document émis est nommé d'après son contenu : un seul fichier pour tous les documents qui ont le même logo ;
+   - `DemoSeeder` refuse la production et une base qui contient déjà des documents ;
+   - README : installation sur l'ordinateur du bureau (Windows), VPS et hébergement mutualisé.

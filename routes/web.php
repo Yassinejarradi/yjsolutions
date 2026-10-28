@@ -6,6 +6,7 @@ use App\Http\Controllers\DocumentLogoController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\Settings\BackupController;
 use App\Http\Controllers\Settings\CompanySettingsController;
 use App\Http\Controllers\Settings\DocumentSettingsController;
 use App\Http\Controllers\Settings\LogoController;
@@ -70,6 +71,12 @@ Route::middleware('auth')->group(function () {
         Route::get('documents', [DocumentSettingsController::class, 'edit'])->name('documents');
         Route::put('documents', [DocumentSettingsController::class, 'update'])->name('documents.update');
         Route::delete('documents/mise-en-page/{type}', [DocumentSettingsController::class, 'resetLayout'])->name('documents.layout.reset');
+
+        Route::get('sauvegardes', [BackupController::class, 'index'])->name('backups');
+        Route::post('sauvegardes', [BackupController::class, 'store'])->name('backups.store');
+        Route::get('sauvegardes/{name}', [BackupController::class, 'download'])
+            ->where('name', 'sauvegarde-[0-9-]+\.zip')
+            ->name('backups.download');
 
         Route::resource('utilisateurs', UserController::class)
             ->except('show')

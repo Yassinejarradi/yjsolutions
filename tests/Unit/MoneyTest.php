@@ -19,6 +19,18 @@ it('ajoute la devise sur demande', function () {
     expect(Money::format(1234567, withCurrency: true))->toBe('12 345,67 MAD');
 });
 
+it('abrège les montants pour le graphique', function (int $cents, string $expected) {
+    expect(Money::compact($cents))->toBe($expected);
+})->with([
+    [0, '0'],
+    [95000, '950'],
+    [100000, '1 k'],
+    [1250000, '12,5 k'],
+    [8350500, '83,5 k'],
+    [45000000, '450 k'],
+    [125000000, '1,25 M'],
+]);
+
 it('lit les saisies courantes', function (string $input, ?int $expected) {
     expect(Money::parse($input))->toBe($expected);
 })->with([

@@ -1,6 +1,20 @@
 @php
+    use App\Support\Money;
+
     $hour = now()->hour;
     $greeting = $hour < 18 ? 'Bonjour' : 'Bonsoir';
+    $today = today()->locale('fr');
+    $monthName = $today->isoFormat('MMMM');
+    $ofMonth = (in_array($monthName[0], ['a', 'o'], true) ? 'd’' : 'de ').$monthName; // d’avril, d’août, d’octobre
+
+    $figures = [
+        ['label' => 'Chiffre d’affaires '.$ofMonth, 'value' => $monthRevenue, 'hint' => 'HT, factures émises ce mois-ci'],
+        ['label' => 'Chiffre d’affaires '.$today->year, 'value' => $yearRevenue, 'hint' => 'HT, depuis le 1er janvier'],
+        ['label' => 'Encaissé en '.$today->year, 'value' => $yearCollected, 'hint' => 'TTC, paiements reçus'],
+    ];
+
+    $maxMonth = max(1, max(array_column($monthly, 'total')));
+    $chartTotal = array_sum(array_column($monthly, 'total'));
 
     $stats = [
         [
@@ -37,7 +51,7 @@
 
             <div class="relative flex flex-wrap items-end justify-between gap-4">
                 <div>
-                    <p class="text-sm font-medium capitalize text-white/70">{{ now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</p>
+                    <p class="text-sm font-medium capitalize text-white/70">{{ $today->isoFormat('dddd D MMMM YYYY') }}</p>
                     <h1 class="mt-0.5 text-2xl font-extrabold">{{ $greeting }} {{ auth()->user()->name }}</h1>
                     <p class="mt-1 max-w-xl text-white/80">Que voulez-vous faire aujourd’hui&nbsp;?</p>
                 </div>
@@ -48,6 +62,61 @@
             </div>
         </div>
     </x-slot>
+
+    {{-- Chiffre d'affaires --}}
+    <h2 class="mb-3 text-lg font-bold">Chiffre d’affaires</h2>
+    <div class="mb-4 grid gap-4 sm:grid-cols-3">
+        @foreach ($figures as $figure)
+            <div class="card">
+                <p class="text-muted">{{ $figure['label'] }}</p>
+                <p class="mt-1 truncate text-xl font-extrabold tabular-nums text-ink">{{ Money::format($figure['value'], true) }}</p>
+                <p class="text-sm text-muted">{{ $figure['hint'] }}</p>
+            </div>
+        @endforeach
+    </div>
+
+    {{-- Graphique : CA HT des 12 derniers mois --}}
+    <section class="card mb-8" aria-labelledby="chart-title">
+        <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+            <h3 id="chart-title" class="font-bold text-ink">Chiffre d’affaires HT sur 12 mois</h3>
+            <p class="text-sm text-muted">Total&nbsp;: <span class="font-semibold text-ink tabular-nums">{{ Money::format($chartTotal, true) }}</span></p>
+        </div>
+
+        <div class="flex h-48 items-end gap-1 border-b border-line sm:gap-2" aria-hidden="true">
+            @foreach ($monthly as $point)
+                @php($current = $loop->last)
+                @php($height = $point['total'] > 0 ? max(2, round($point['total'] / $maxMonth * 100)) : 0)
+                <div class="group flex h-full min-w-0 flex-1 flex-col items-center justify-end"
+                     title="{{ ucfirst($point['month']->locale('fr')->isoFormat('MMMM YYYY')) }} : {{ Money::format($point['total'], true) }} HT">
+                    @if ($point['total'] > 0)
+                        <span class="mb-1 hidden whitespace-nowrap text-xs font-semibold tabular-nums text-muted sm:block">{{ Money::compact($point['total']) }}</span>
+                    @endif
+                    <span @class([
+                        'w-full max-w-[3rem] rounded-t-md transition',
+                        'bg-gradient-to-t from-brand to-brand-light' => $current,
+                        'bg-brand/25 group-hover:bg-brand/50' => ! $current,
+                    ]) style="height: {{ $height }}%"></span>
+                </div>
+            @endforeach
+        </div>
+        <div class="mt-2 flex gap-1 sm:gap-2" aria-hidden="true">
+            @foreach ($monthly as $point)
+                <span @class(['min-w-0 flex-1 whitespace-nowrap text-center text-[11px] tracking-tight sm:text-xs sm:tracking-normal', 'font-bold text-brand' => $loop->last, 'text-muted' => ! $loop->last])>
+                    {{ rtrim($point['month']->locale('fr')->isoFormat('MMM'), '.') }}
+                </span>
+            @endforeach
+        </div>
+
+        {{-- Les mêmes chiffres, lisibles par un lecteur d'écran --}}
+        <table class="sr-only">
+            <caption>Chiffre d’affaires HT par mois</caption>
+            <tbody>
+                @foreach ($monthly as $point)
+                    <tr><th scope="row">{{ $point['month']->locale('fr')->isoFormat('MMMM YYYY') }}</th><td>{{ Money::format($point['total'], true) }}</td></tr>
+                @endforeach
+            </tbody>
+        </table>
+    </section>
 
     {{-- À suivre --}}
     <h2 class="mb-3 text-lg font-bold">À suivre</h2>

@@ -25,6 +25,29 @@ class Money
     }
 
     /**
+     * Forme courte pour un graphique, sans centimes : 950 / 12,5 k / 1,25 M.
+     */
+    public static function compact(int $cents): string
+    {
+        $dirhams = intdiv($cents, 100);
+        $abs = abs($dirhams);
+
+        [$value, $suffix] = match (true) {
+            $abs >= 1_000_000 => [$dirhams / 1_000_000, ' M'],
+            $abs >= 1_000 => [$dirhams / 1_000, ' k'],
+            default => [$dirhams, ''],
+        };
+
+        $decimals = $suffix === '' ? 0 : (abs($value) >= 100 ? 0 : (abs($value) >= 10 ? 1 : 2));
+        $formatted = number_format($value, $decimals, ',', ' ');
+        if ($decimals > 0) {
+            $formatted = rtrim(rtrim($formatted, '0'), ',');
+        }
+
+        return $formatted.$suffix;
+    }
+
+    /**
      * Lit une saisie ("1 234,56", "1234.5"...) et renvoie des centimes, ou null si invalide.
      */
     public static function parse(string|int|null $input): ?int

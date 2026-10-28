@@ -270,6 +270,7 @@ final class DocumentLayout
 
     /**
      * Copie le logo actuel des Paramètres pour le figer dans un document envoyé.
+     * Le fichier est nommé d'après son contenu : tous les documents émis avec le même logo partagent une seule copie.
      */
     public static function freezeLogo(array $layout): array
     {
@@ -279,8 +280,10 @@ final class DocumentLayout
 
         $source = Setting::current()->logoFilePath();
         $extension = strtolower(pathinfo($source, PATHINFO_EXTENSION)) === 'png' ? 'png' : 'jpg';
-        $path = self::LOGO_DIR.'/'.Str::random(32).'.'.$extension;
-        Storage::disk(self::LOGO_DISK)->put($path, (string) file_get_contents($source));
+        $path = self::LOGO_DIR.'/'.sha1_file($source).'.'.$extension;
+        if (! Storage::disk(self::LOGO_DISK)->exists($path)) {
+            Storage::disk(self::LOGO_DISK)->put($path, (string) file_get_contents($source));
+        }
 
         $layout['logo']['mode'] = 'custom';
         $layout['logo']['path'] = $path;

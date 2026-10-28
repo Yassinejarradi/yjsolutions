@@ -187,6 +187,16 @@ test('« Rétablir » ramène le document au modèle', function () {
     expect($this->quote->fresh()->layout)->toBeNull();
 });
 
+test('les documents envoyés avec le même logo partagent une seule copie', function () {
+    $other = Quote::factory()->withLines([['Formation', '1', 50000]])->create();
+    $this->quote->send();
+    $other->send();
+
+    $path = $this->quote->fresh()->resolvedLayout()['logo']['path'];
+    expect($other->fresh()->resolvedLayout()['logo']['path'])->toBe($path)
+        ->and(Storage::disk('local')->files(DocumentLayout::LOGO_DIR))->toBe([$path]);
+});
+
 test('la mise en page et le logo d’un devis envoyé sont figés', function () {
     $this->quote->update(['layout' => ['labels' => ['title' => 'PROPOSITION']]]);
     $this->quote->send();

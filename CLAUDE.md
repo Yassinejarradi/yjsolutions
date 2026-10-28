@@ -41,6 +41,12 @@ Le document A4 s'édite directement à l'écran, sur le modèle de [docs/prototy
 - Les lignes ont `wire:key` = clé + position : sinon, après un déplacement, les champs liés par position affichent l'ancienne valeur.
 - PhpWord : échappement activé et largeurs en twips entiers, sinon Word refuse d'ouvrir le fichier.
 
+## Tableau de bord et sauvegardes
+
+- CA et graphique : `App\Support\Revenue` (HT, factures émises non annulées). Pas de « Reste à encaisser » sur le tableau de bord (refusé par l'utilisateur).
+- Sauvegardes : `App\Support\Backup`, commande `backup:run` planifiée dans `routes/console.php`, réglages `config/backup.php`. Démo : `php artisan db:seed --class=DemoSeeder` (base vide seulement).
+- `tests/TestCase.php` fait `Storage::fake('local')` : un test ne doit jamais écrire dans le vrai `storage/app/private`.
+
 ## Règles métier
 
 - Numérotation sans trou (`FAC2026-001`, `DEV2026-001`), attribuée à l'émission, en transaction avec verrou.
