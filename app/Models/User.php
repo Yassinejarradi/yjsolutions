@@ -10,6 +10,13 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    /** Tailles du texte de l'interface proposées dans « Mon profil ». */
+    public const TEXT_SIZES = ['normal' => 'Normal', 'large' => 'Grand', 'xlarge' => 'Très grand'];
+
+    protected $attributes = [
+        'text_size' => 'normal',
+    ];
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
@@ -22,6 +29,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'text_size',
     ];
 
     /**

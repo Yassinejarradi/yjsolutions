@@ -16,14 +16,31 @@
 @tailwind utilities;
 
 @layer base {
-    /* Taille de base : toute l'interface est en rem, ce réglage la met à l'échelle. */
+    /* Taille de base : toute l'interface est en rem, ce réglage la met à l'échelle.
+       Chaque utilisateur choisit Normal, Grand ou Très grand dans « Mon profil » (classe sur <html>). */
     html {
         font-size: 15px;
+    }
+
+    html.text-size-large {
+        font-size: 17px;
+    }
+
+    html.text-size-xlarge {
+        font-size: 19px;
     }
 
     @media (min-width: 1024px) {
         html {
             font-size: 16px;
+        }
+
+        html.text-size-large {
+            font-size: 18px;
+        }
+
+        html.text-size-xlarge {
+            font-size: 20px;
         }
     }
 

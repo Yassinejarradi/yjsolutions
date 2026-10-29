@@ -12,7 +12,7 @@
                     <button type="submit" class="btn-secondary">Dupliquer</button>
                 </form>
                 <form method="POST" action="{{ route('quotes.destroy', $quote) }}"
-                      onsubmit="return confirm('Supprimer définitivement ce brouillon ?')">
+                      data-confirm-title="Supprimer ce brouillon ?" data-confirm="Il sera supprimé définitivement." data-confirm-label="Oui, supprimer" data-confirm-danger>
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn-secondary text-accent">Supprimer le brouillon</button>

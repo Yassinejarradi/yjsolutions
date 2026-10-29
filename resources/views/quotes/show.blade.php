@@ -29,9 +29,16 @@
                 Voir la facture {{ $quote->invoice->number ?? '(brouillon)' }}
             </a>
         @elseif ($quote->canBeInvoiced())
+            <form method="POST" action="{{ route('quotes.invoice', $quote) }}"
+                  data-confirm-title="Facturer ce devis maintenant ?"
+                  data-confirm="Une facture de {{ \App\Support\Money::format($quote->total_ttc, true) }} TTC sera émise aujourd’hui, avec son numéro définitif. Elle ne pourra plus être modifiée (seulement annulée)."
+                  data-confirm-label="Oui, émettre la facture">
+                @csrf
+                <button type="submit" class="btn-primary">Facturer ce devis</button>
+            </form>
             <form method="POST" action="{{ route('quotes.convert', $quote) }}">
                 @csrf
-                <button type="submit" class="btn-primary">Convertir en facture</button>
+                <button type="submit" class="btn-secondary" title="Crée une facture brouillon, modifiable avant de l’émettre">Préparer la facture (brouillon)</button>
             </form>
         @endif
         <a href="{{ route('quotes.pdf', $quote) }}" target="_blank" class="btn-secondary">Voir le PDF</a>
@@ -42,13 +49,14 @@
         </form>
 
         @if ($canDecide)
-            <form method="POST" action="{{ route('quotes.accept', $quote) }}">
+            <form method="POST" action="{{ route('quotes.accept', $quote) }}"
+                  data-confirm-title="Le client a accepté ce devis ?" data-confirm="Le devis passera à « Accepté ». Vous pourrez ensuite le facturer." data-confirm-label="Oui, il a accepté">
                 @csrf
                 @method('PATCH')
                 <button type="submit" class="btn-secondary border-green-600 text-green-800">✓ Le client a accepté</button>
             </form>
             <form method="POST" action="{{ route('quotes.refuse', $quote) }}"
-                  onsubmit="return confirm('Marquer ce devis comme refusé ?')">
+                  data-confirm-title="Le client a refusé ce devis ?" data-confirm="Le devis passera à « Refusé ». Vous pourrez toujours le dupliquer." data-confirm-label="Oui, il a refusé">
                 @csrf
                 @method('PATCH')
                 <button type="submit" class="btn-secondary text-accent">✕ Le client a refusé</button>

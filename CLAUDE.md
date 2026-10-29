@@ -45,6 +45,9 @@ Le document A4 s'édite directement à l'écran, sur le modèle de [docs/prototy
 
 - CA et graphique : `App\Support\Revenue` (HT, factures émises non annulées). Pas de « Reste à encaisser » sur le tableau de bord (refusé par l'utilisateur).
 - Sauvegardes : `App\Support\Backup`, commande `backup:run` planifiée dans `routes/console.php`, réglages `config/backup.php`. Démo : `php artisan db:seed --class=DemoSeeder` (base vide seulement).
+- Confirmations : jamais `confirm()` ni `wire:confirm` (un test le vérifie). Formulaire : `data-confirm-title`, `data-confirm`, `data-confirm-label`, `data-confirm-danger` ; Livewire/Alpine : `$dispatch('confirm-action', { title, message, confirmLabel, onConfirm })`. Voir `resources/js/confirm-dialog.js`.
+- Relances WhatsApp : `App\Support\PaymentReminder` (numéro marocain 06… → 2126…). Relevé de compte : `App\Support\ClientStatement`.
+- Taille du texte : `users.text_size`, classe `text-size-*` sur `<html>`, tailles dans `app.css`.
 - `tests/TestCase.php` fait `Storage::fake('local')` : un test ne doit jamais écrire dans le vrai `storage/app/private`.
 
 ## Règles métier

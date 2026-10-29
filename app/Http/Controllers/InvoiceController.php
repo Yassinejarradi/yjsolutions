@@ -38,7 +38,7 @@ class InvoiceController extends Controller
     }
 
     /**
-     * « Convertir en facture » depuis un devis envoyé ou accepté.
+     * « Préparer la facture (brouillon) » depuis un devis envoyé ou accepté.
      */
     public function fromQuote(Quote $quote): RedirectResponse
     {
@@ -54,6 +54,33 @@ class InvoiceController extends Controller
 
         return redirect()->route('invoices.show', $invoice)
             ->with('success', "Facture brouillon créée à partir du devis {$quote->number}. Vérifiez-la, puis cliquez sur « Émettre la facture ».");
+    }
+
+    /**
+     * « Facturer ce devis » en un clic : la facture est créée et émise tout de suite, datée d'aujourd'hui.
+     * Si l'émission n'est pas possible (client archivé, date…), le brouillon reste ouvert pour être complété.
+     */
+    public function issueFromQuote(Quote $quote): RedirectResponse
+    {
+        if ($quote->invoice) {
+            return redirect()->route('invoices.show', $quote->invoice)->with('success', 'Ce devis a déjà été facturé.');
+        }
+
+        try {
+            $invoice = Invoice::fromQuote($quote);
+        } catch (LogicException $e) {
+            return redirect()->route('quotes.show', $quote)->with('error', $e->getMessage());
+        }
+
+        try {
+            $invoice->issue();
+        } catch (LogicException $e) {
+            return redirect()->route('invoices.show', $invoice)
+                ->with('error', 'La facture n’a pas pu être émise : '.$e->getMessage().' Complétez le brouillon, puis cliquez sur « Émettre la facture ».');
+        }
+
+        return redirect()->route('invoices.show', $invoice)
+            ->with('success', "Facture {$invoice->number} émise à partir du devis {$quote->number}.");
     }
 
     /**

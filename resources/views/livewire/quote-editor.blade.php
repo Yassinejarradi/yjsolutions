@@ -11,7 +11,9 @@
         'routePrefix' => 'quotes',
         'newDocumentHint' => 'Nouveau devis : il sera enregistré dès la première saisie.',
         'sendLabel' => 'Marquer comme envoyé',
-        'sendConfirm' => "Marquer ce devis comme envoyé ?\n\nIl recevra son numéro définitif et ne pourra plus être modifié (vous pourrez toujours le dupliquer).",
+        'sendTitle' => 'Marquer ce devis comme envoyé ?',
+        'sendConfirm' => 'Il recevra son numéro définitif et ne pourra plus être modifié (vous pourrez toujours le dupliquer).',
+        'sendConfirmLabel' => 'Oui, marquer comme envoyé',
     ])
 
     {{-- ===================== Feuille A4 ===================== --}}

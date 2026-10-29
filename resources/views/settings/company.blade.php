@@ -69,7 +69,7 @@
 
     @if ($setting->logo_path)
         <form method="POST" action="{{ route('settings.company.logo.destroy') }}" class="mt-4"
-              onsubmit="return confirm('Remettre le logo d’origine ?')">
+              data-confirm-title="Remettre le logo d’origine ?" data-confirm="Le logo téléversé sera retiré. Les documents déjà envoyés gardent leur logo." data-confirm-label="Oui, remettre l’original">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn-secondary">Rétablir le logo d’origine</button>

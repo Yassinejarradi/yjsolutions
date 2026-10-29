@@ -25,7 +25,10 @@
                 @endif
             </h1>
         </div>
-        <a href="{{ route('clients.edit', $client) }}" class="btn-primary">Modifier le client</a>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('clients.statement', $client) }}" target="_blank" class="btn-secondary">Relevé de compte (PDF)</a>
+            <a href="{{ route('clients.edit', $client) }}" class="btn-primary">Modifier le client</a>
+        </div>
     </x-slot>
 
     @if ($client->isArchived())
@@ -162,7 +165,7 @@
                 </form>
             @else
                 <form method="POST" action="{{ route('clients.archive', $client) }}"
-                      onsubmit="return confirm(@js('Archiver '.$client->name.' ? Il ne sera plus proposé pour les nouveaux documents.'))">
+                      data-confirm-title="Archiver {{ $client->name }} ?" data-confirm="Il ne sera plus proposé pour les nouveaux devis et factures. Ses documents restent visibles, et vous pourrez le réactiver." data-confirm-label="Oui, archiver">
                     @csrf
                     @method('PATCH')
                     <button type="submit" class="btn-secondary">Archiver le client</button>
@@ -173,7 +176,7 @@
                 <p class="text-muted">Ce client a des devis ou des factures : il ne peut pas être supprimé, seulement archivé.</p>
             @else
                 <form method="POST" action="{{ route('clients.destroy', $client) }}"
-                      onsubmit="return confirm(@js('Supprimer définitivement '.$client->name.' ?'))">
+                      data-confirm-title="Supprimer {{ $client->name }} ?" data-confirm="Le client sera supprimé définitivement." data-confirm-label="Oui, supprimer" data-confirm-danger>
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn-danger">Supprimer le client</button>

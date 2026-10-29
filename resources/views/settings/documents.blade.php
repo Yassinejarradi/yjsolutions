@@ -85,7 +85,7 @@
             </p>
             @if ($custom)
                 <form method="POST" action="{{ route('settings.documents.layout.reset', $type) }}"
-                      onsubmit="return confirm(@js('Revenir à la mise en page d’origine pour les prochains '.$plural.' ?'))">
+                      data-confirm-title="Rétablir la mise en page d’origine ?" data-confirm="Elle s’appliquera aux prochains {{ $plural }}. Les documents existants ne changent pas." data-confirm-label="Oui, rétablir">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn-secondary">Rétablir la mise en page d’origine</button>

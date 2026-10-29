@@ -113,12 +113,10 @@
                     Les {{ $documentLabel }} déjà envoyés ne changent pas.
                 </p>
                 <div class="flex flex-col gap-2">
-                    <button type="button" class="btn-primary" wire:click="saveLayoutAsTemplate"
-                            wire:confirm="Utiliser cette mise en page pour tous les prochains {{ $documentLabel }} ?">
+                    <button type="button" class="btn-primary" @click="$dispatch('confirm-action', { title: @js('Utiliser cette mise en page pour tous les prochains '.$documentLabel.' ?'), message: @js('Les '.$documentLabel.' déjà envoyés ne changent pas.'), confirmLabel: 'Oui, l’utiliser', onConfirm: () => $wire.saveLayoutAsTemplate() })">
                         Utiliser pour les prochains {{ $documentLabel }}
                     </button>
-                    <button type="button" class="btn-secondary" wire:click="resetLayout"
-                            wire:confirm="Revenir à la mise en page par défaut sur ce document ?">
+                    <button type="button" class="btn-secondary" @click="$dispatch('confirm-action', { title: 'Revenir à la mise en page par défaut ?', message: 'Les textes, le logo et les éléments affichés de ce document reprennent les réglages par défaut.', confirmLabel: 'Oui, rétablir', onConfirm: () => $wire.resetLayout() })">
                         Rétablir la mise en page par défaut
                     </button>
                 </div>

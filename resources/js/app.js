@@ -6,8 +6,10 @@ import '@fontsource-variable/inter';
 // ajouter des composants Alpine sans charger Alpine deux fois.
 import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import registerDocumentEditor, { autosize } from './document-editor';
+import registerConfirmDialog from './confirm-dialog';
 
 window.autosize = autosize;
 registerDocumentEditor(Alpine);
+registerConfirmDialog(Alpine);
 
 Livewire.start();

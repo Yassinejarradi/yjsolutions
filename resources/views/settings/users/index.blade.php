@@ -23,7 +23,7 @@
                         <a href="{{ route('settings.users.edit', $user) }}" class="btn-secondary">Modifier</a>
                         @unless ($user->is(auth()->user()))
                             <form method="POST" action="{{ route('settings.users.destroy', $user) }}"
-                                  onsubmit="return confirm(@js('Supprimer définitivement le compte de '.$user->name.' ?'))">
+                                  data-confirm-title="Supprimer le compte de {{ $user->name }} ?" data-confirm="Cette personne ne pourra plus se connecter. Les devis et factures ne sont pas touchés." data-confirm-label="Oui, supprimer le compte" data-confirm-danger>
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn-danger">Supprimer</button>

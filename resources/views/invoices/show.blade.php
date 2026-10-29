@@ -35,7 +35,7 @@
         </form>
         @if ($open && $invoice->amount_paid === 0)
             <form method="POST" action="{{ route('invoices.cancel', $invoice) }}"
-                  onsubmit="return confirm(@js('Annuler la facture '.$invoice->number.' ?\n\nElle garde son numéro et reste dans la liste ; son PDF portera la mention « ANNULÉE ». Cette action est définitive.'))">
+                  data-confirm-title="Annuler la facture {{ $invoice->number }} ?" data-confirm="Elle garde son numéro et reste dans la liste ; son PDF portera la mention « ANNULÉE ». Cette action est définitive." data-confirm-label="Oui, annuler la facture" data-confirm-danger>
                 @csrf
                 @method('PATCH')
                 <button type="submit" class="btn-secondary text-accent">Annuler la facture</button>
@@ -76,7 +76,7 @@
                             <span class="flex items-center gap-4">
                                 <span class="font-semibold tabular-nums">{{ Money::format($payment->amount, true) }}</span>
                                 <form method="POST" action="{{ route('invoices.payments.destroy', [$invoice, $payment]) }}"
-                                      onsubmit="return confirm('Supprimer ce paiement (saisi par erreur) ?')">
+                                      data-confirm-title="Supprimer ce paiement ?" data-confirm="À utiliser seulement pour un paiement saisi par erreur. Le reste à payer sera recalculé." data-confirm-label="Oui, supprimer le paiement" data-confirm-danger>
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn-link text-sm text-accent">Supprimer</button>
@@ -90,7 +90,7 @@
             @if ($open && $balance > 0)
                 <div class="mt-6 flex flex-wrap gap-3" x-show="! form">
                     <form method="POST" action="{{ route('invoices.payments.store', $invoice) }}"
-                          onsubmit="return confirm(@js('Enregistrer un paiement de '.Money::format($balance, true).' aujourd’hui (virement) ? La facture sera payée.'))">
+                          data-confirm-title="Marquer la facture comme payée ?" data-confirm="Un paiement de {{ Money::format($balance, true) }} par virement sera enregistré à la date d’aujourd’hui." data-confirm-label="Oui, elle est payée">
                         @csrf
                         <input type="hidden" name="paid_on" value="{{ today()->format('d/m/Y') }}">
                         <input type="hidden" name="amount" value="{{ Money::toInput($balance) }}">
@@ -98,6 +98,14 @@
                         <button type="submit" class="btn-primary">✓ Marquer comme payée</button>
                     </form>
                     <button type="button" class="btn-secondary" @click="form = true">Paiement partiel ou autre mode…</button>
+                    @php($tel = \App\Support\PaymentReminder::telLink($invoice->client?->phone))
+                    <span class="flex flex-wrap gap-3 sm:ml-auto">
+                        @if ($tel)
+                            <a href="{{ $tel }}" class="btn-secondary">Appeler le client</a>
+                        @endif
+                        <a href="{{ \App\Support\PaymentReminder::whatsappLink($invoice) }}" target="_blank" rel="noopener"
+                           class="btn bg-[#25D366] text-white shadow-sm hover:bg-[#1DA851]">Relancer par WhatsApp</a>
+                    </span>
                 </div>
 
                 <form method="POST" action="{{ route('invoices.payments.store', $invoice) }}" x-show="form" x-cloak class="mt-6 space-y-5">

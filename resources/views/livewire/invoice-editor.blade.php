@@ -12,7 +12,9 @@
         'newDocumentHint' => 'Nouvelle facture : elle sera enregistrée dès la première saisie.',
         'sendLabel' => 'Émettre la facture',
         'sendAction' => 'issue',
-        'sendConfirm' => "Émettre cette facture ?\n\nElle recevra son numéro définitif et ne pourra plus être modifiée ni supprimée (seulement annulée).",
+        'sendTitle' => 'Émettre cette facture ?',
+        'sendConfirm' => 'Elle recevra son numéro définitif et ne pourra plus être modifiée ni supprimée (seulement annulée).',
+        'sendConfirmLabel' => 'Oui, émettre la facture',
     ])
 
     @if ($tooEarly)

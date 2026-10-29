@@ -171,15 +171,15 @@ test('annuler une facture depuis sa page', function () {
     $this->get("/factures/{$invoice->id}")->assertSee('Annulée')->assertDontSee('Marquer comme payée');
 });
 
-test('« Convertir en facture » depuis la page du devis', function () {
+test('« Préparer la facture (brouillon) » depuis la page du devis', function () {
     $quote = Quote::factory()->sent()->create();
 
-    $this->get("/devis/{$quote->id}")->assertSee('Convertir en facture');
+    $this->get("/devis/{$quote->id}")->assertSee('Facturer ce devis')->assertSee('Préparer la facture (brouillon)');
     $this->post("/devis/{$quote->id}/convertir")->assertRedirect()->assertSessionHas('success');
 
     $invoice = Invoice::sole();
     expect($invoice->quote_id)->toBe($quote->id);
-    $this->get("/devis/{$quote->id}")->assertDontSee('Convertir en facture')->assertSee('Voir la facture');
+    $this->get("/devis/{$quote->id}")->assertDontSee('Préparer la facture')->assertSee('Voir la facture');
 
     // Un deuxième clic ouvre la facture existante.
     $this->post("/devis/{$quote->id}/convertir")->assertRedirect(route('invoices.show', $invoice));

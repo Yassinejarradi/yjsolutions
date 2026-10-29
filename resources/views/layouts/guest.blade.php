@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Connexion – JY Solutions</title>
-    <link rel="icon" href="{{ route('logo') }}">
+    @include('layouts.partials.app-meta')
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

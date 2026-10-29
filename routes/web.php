@@ -6,6 +6,7 @@ use App\Http\Controllers\DocumentLogoController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\Settings\BackupController;
 use App\Http\Controllers\Settings\CompanySettingsController;
 use App\Http\Controllers\Settings\DocumentSettingsController;
@@ -21,7 +22,10 @@ Route::get('logo', LogoController::class)->name('logo');
 Route::middleware('auth')->group(function () {
     Route::get('tableau-de-bord', DashboardController::class)->name('dashboard');
 
+    Route::get('relances', ReminderController::class)->name('reminders');
+
     Route::resource('clients', ClientController::class);
+    Route::get('clients/{client}/releve', [ClientController::class, 'statement'])->name('clients.statement');
     Route::patch('clients/{client}/archiver', [ClientController::class, 'archive'])->name('clients.archive');
     Route::patch('clients/{client}/reactiver', [ClientController::class, 'restore'])->name('clients.restore');
 
@@ -52,6 +56,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('paiements/{payment}', 'destroyPayment')->name('payments.destroy')->scopeBindings();
     });
     Route::post('devis/{quote}/convertir', [InvoiceController::class, 'fromQuote'])->name('quotes.convert');
+    Route::post('devis/{quote}/facturer', [InvoiceController::class, 'issueFromQuote'])->name('quotes.invoice');
 
     // Logos propres à un document (nom aléatoire, jamais choisi par l'utilisateur).
     Route::get('logos-documents/{file}', DocumentLogoController::class)
@@ -60,6 +65,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('profil/taille-du-texte', [ProfileController::class, 'updateTextSize'])->name('profile.text-size');
 
     Route::prefix('parametres')->name('settings.')->group(function () {
         Route::redirect('/', '/parametres/societe')->name('index');

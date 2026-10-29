@@ -21,7 +21,7 @@
             'label' => 'Factures en retard',
             'value' => $overdueCount,
             'hint' => $overdueCount ? 'échéance dépassée' : 'aucun retard',
-            'url' => route('invoices.index', ['statut' => 'overdue']),
+            'url' => route('reminders'),
             'tone' => $overdueCount ? 'from-red-500 to-accent' : 'from-emerald-500 to-teal-600',
             'icon' => 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z',
         ],

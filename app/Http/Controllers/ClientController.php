@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ClientRequest;
 use App\Models\Client;
 use App\Models\Setting;
+use App\Support\ClientStatement;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 /**
@@ -50,6 +52,19 @@ class ClientController extends Controller
         $client->update($request->clientData());
 
         return redirect()->route('clients.show', $client)->with('success', "Le client {$client->name} a été modifié.");
+    }
+
+    /**
+     * Relevé de compte en PDF : factures émises, paiements et solde dû.
+     */
+    public function statement(Client $client): Response
+    {
+        $statement = ClientStatement::for($client);
+
+        return response($statement->pdf(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$statement->fileName().'.pdf"',
+        ]);
     }
 
     public function archive(Client $client): RedirectResponse

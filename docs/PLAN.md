@@ -110,3 +110,10 @@ Plan validé le 26/10/2026, après réduction du périmètre. Le cahier des char
    - le logo figé dans un document émis est nommé d'après son contenu : un seul fichier pour tous les documents qui ont le même logo ;
    - `DemoSeeder` refuse la production et une base qui contient déjà des documents ;
    - README : installation sur l'ordinateur du bureau (Windows), VPS et hébergement mutualisé.
+6. **Pack confort** ✅ (demandé après la phase 5) :
+   - fenêtre de confirmation commune, grande et en français (`data-confirm` sur un formulaire, `confirm-action` depuis Alpine), à la place de la boîte `confirm()` du navigateur ; ajoutée sur « Le client a accepté » ;
+   - « Facturer ce devis » : facture créée **et émise** en un clic (après confirmation) ; « Préparer la facture (brouillon) » reste possible ; si l'émission échoue, le brouillon s'ouvre avec l'explication ;
+   - page « À relancer » (factures en retard et à échéance dans 7 jours), pastille du nombre de retards dans le menu, boutons « Appeler » et « WhatsApp » (message de relance prérédigé, envoyé par l'utilisateur lui-même : toujours pas d'envoi automatique) ;
+   - relevé de compte client en PDF (factures émises, payé, solde dû, RIB) ;
+   - taille du texte par utilisateur (Normal, Grand, Très grand) dans « Mon profil » ;
+   - installation sur l'écran d'accueil du téléphone (manifeste et icônes, sans service worker pour éviter tout cache périmé).
