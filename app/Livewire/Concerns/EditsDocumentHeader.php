@@ -102,6 +102,34 @@ trait EditsDocumentHeader
         $this->documentChanged();
     }
 
+    /** ICE saisi sur la feuille quand la fiche du client n'en a pas. */
+    public string $clientIce = '';
+
+    /**
+     * Complète la fiche du client avec son ICE, sans quitter le document.
+     */
+    public function saveClientIce(): void
+    {
+        $client = $this->clientId ? Client::find($this->clientId) : null;
+        if (! $client) {
+            return;
+        }
+
+        $this->clientIce = preg_replace('/\s+/', '', $this->clientIce);
+
+        $this->validate([
+            'clientIce' => ['required', 'digits:15', Rule::unique(Client::class, 'ice')->ignore($client->id)],
+        ], [
+            'clientIce.required' => 'Tapez l’ICE du client (15 chiffres).',
+            'clientIce.unique' => 'Un autre client a déjà cet ICE.',
+        ], [
+            'clientIce' => 'ICE',
+        ]);
+
+        $client->forceFill(['ice' => $this->clientIce])->save();
+        $this->clientIce = '';
+    }
+
     /**
      * Avant l'émission ($action : « envoyer le devis », « émettre la facture ») :
      * un client et au moins une ligne avec une désignation.

@@ -14,6 +14,19 @@
                         @if ($client->ice && $layout['show']['client_ice'])<span class="mt-1.5 block">ICE : {{ $client->ice }}</span>@endif
                         <span class="mt-1 block text-sm font-semibold text-brand">Changer de client</span>
                     </button>
+                    @if (! $client->ice && $layout['show']['client_ice'])
+                        {{-- Rappel à l'écran seulement : la feuille imprimée n'affiche rien tant que l'ICE manque. --}}
+                        <form wire:submit="saveClientIce" data-no-autosave class="mt-2 rounded-lg border border-amber-300 bg-amber-50 p-3">
+                            <label for="client-ice" class="block font-semibold text-amber-900">L’ICE de ce client n’est pas renseigné.</label>
+                            <p class="text-sm text-amber-900">Il est obligatoire sur une facture. Tapez-le ici, il sera aussi enregistré sur la fiche du client.</p>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                <input id="client-ice" wire:model="clientIce" inputmode="numeric" maxlength="20" placeholder="15 chiffres"
+                                       @class(['field-input w-48', 'is-invalid' => $errors->has('clientIce')])>
+                                <button type="submit" class="btn-primary">Enregistrer l’ICE</button>
+                            </div>
+                            @error('clientIce')<p class="mt-1 text-sm font-semibold text-accent">{{ $message }}</p>@enderror
+                        </form>
+                    @endif
                 @else
                     <div class="flex flex-wrap gap-2">
                         <button type="button" @click="toggle()" @class(['btn-secondary', 'ring-2 ring-accent' => $errors->has('clientId')])>Choisir le client…</button>

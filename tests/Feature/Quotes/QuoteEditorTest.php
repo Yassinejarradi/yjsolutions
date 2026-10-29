@@ -261,3 +261,25 @@ test('un nouveau devis ouvert depuis la fiche client est préréglé sur ce clie
 
     $this->get("/devis/nouveau?client={$client->id}")->assertOk()->assertSee('Client préréglé');
 });
+
+test('l’ICE manquant du client se complète depuis la feuille', function () {
+    $client = Client::factory()->create(['name' => 'Sans ICE SARL', 'ice' => null]);
+    Client::factory()->create(['ice' => '001234567000089']);
+
+    $editor = Livewire::test(QuoteEditor::class)
+        ->call('chooseClient', $client->id)
+        ->assertSee('L’ICE de ce client n’est pas renseigné.')
+        ->set('clientIce', '123')
+        ->call('saveClientIce')
+        ->assertHasErrors(['clientIce' => 'digits'])
+        ->set('clientIce', '001234567000089')
+        ->call('saveClientIce')
+        ->assertSee('Un autre client a déjà cet ICE.')
+        ->set('clientIce', '002 345 678 000 091')
+        ->call('saveClientIce')
+        ->assertHasNoErrors()
+        ->assertDontSee('L’ICE de ce client n’est pas renseigné.')
+        ->assertSee('ICE : 002345678000091');
+
+    expect($client->fresh()->ice)->toBe('002345678000091');
+});
