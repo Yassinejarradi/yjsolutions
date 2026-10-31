@@ -117,3 +117,9 @@ Plan validé le 26/10/2026, après réduction du périmètre. Le cahier des char
    - relevé de compte client en PDF (factures émises, payé, solde dû, RIB) ;
    - taille du texte par utilisateur (Normal, Grand, Très grand) dans « Mon profil » ;
    - installation sur l'écran d'accueil du téléphone (manifeste et icônes, sans service worker pour éviter tout cache périmé).
+7. **Installation Windows « application de bureau »** ✅ (demandée après le pack confort) :
+   - paquet `dist/JYSolutions/` construit par `deploy/build-package.ps1` (vendor sans dev, assets construits, `.env.production`, PHP 8.4 portable à ajouter dans `php\`) ;
+   - `install.bat`, lanceur `JY Solutions.vbs` (serveur caché sur 127.0.0.1:8765, Edge `--app`, jamais deux serveurs), `stop.bat`, `backup.bat` (zip daté, 30 gardés, OneDrive sinon Documents), `install-backup-task.bat` (12:00 et ouverture de session), `update.bat` (sauvegarde puis remplacement du code, sans toucher `.env`, la base, `storage`, `php`) ;
+   - SQLite : transactions `IMMEDIATE` et attente de 10 s (`busy_timeout`) ; vérifié avec 6 processus qui numérotent en même temps (PHP 8.4 : 180/180, sans trou ni doublon) ;
+   - `backup:run --to= --keep=` et `storage/app/public` dans le zip ;
+   - mode d'emploi : `deploy/INSTALL-PC-PAPA.md`.

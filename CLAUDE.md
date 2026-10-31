@@ -50,6 +50,13 @@ Le document A4 s'édite directement à l'écran, sur le modèle de [docs/prototy
 - Taille du texte : `users.text_size`, classe `text-size-*` sur `<html>`, tailles dans `app.css`.
 - `tests/TestCase.php` fait `Storage::fake('local')` : un test ne doit jamais écrire dans le vrai `storage/app/private`.
 
+## Installation Windows « application de bureau »
+
+- `deploy/build-package.ps1` produit `dist/JYSolutions/` ; scripts sources dans `deploy/windows/` (le build les convertit : CRLF, `.ps1` en UTF-8 avec BOM, `.vbs` en UTF-16). Mode d'emploi : `deploy/INSTALL-PC-PAPA.md`.
+- PHP 8.4 NTS sur le PC cible : Laravel n'applique `transaction_mode => IMMEDIATE` (config/database.php) qu'à partir de 8.4. Sans lui, deux transactions SQLite qui lisent puis écrivent échouent en « database is locked ».
+- `.env.production` ne doit jamais rester à côté de `.env` : avec `APP_ENV=production`, `config:cache` le lirait à la place de `.env` (clé vide). `install.bat` le déplace, `update.bat` ne le copie pas.
+- Dans les `.bat`, `chcp`, `php artisan` et `powershell` lisent l'entrée redirigée : leur donner `<nul` (sauf `user:create`, qui demande le mot de passe).
+
 ## Règles métier
 
 - Numérotation sans trou (`FAC2026-001`, `DEV2026-001`), attribuée à l'émission, en transaction avec verrou.

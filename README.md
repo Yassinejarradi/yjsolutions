@@ -96,12 +96,12 @@ Six clients, une vingtaine de factures réparties sur les 12 derniers mois (pay�
 `php artisan backup:run` crée `storage/app/backups/sauvegarde-AAAA-MM-JJ-HHMMSS.zip` contenant :
 
 - la base : copie du fichier SQLite, ou export SQL complet pour MySQL (fait en PHP, `mysqldump` n'est pas nécessaire) ;
-- les logos téléversés (`storage/app/private`) ;
+- les logos téléversés (`storage/app/private`) et `storage/app/public` ;
 - un `LISEZMOI.txt` avec les étapes de restauration.
 
 Elle est **planifiée chaque jour à 13 h** (`routes/console.php`), à condition que le planificateur Laravel tourne (voir ci-dessous). Les 30 plus récentes sont gardées. Dans l'application : **Paramètres › Sauvegardes** pour en faire une tout de suite et les télécharger.
 
-Réglages facultatifs dans `.env` : `BACKUP_PATH` (dossier), `BACKUP_KEEP` (nombre gardé), `BACKUP_TIME` (heure, ex. `13:00`).
+Réglages facultatifs dans `.env` : `BACKUP_PATH` (dossier), `BACKUP_KEEP` (nombre gardé), `BACKUP_TIME` (heure, ex. `13:00`). En ligne de commande : `php artisan backup:run --to="D:\Sauvegardes" --keep=30` (utilisé par `backup.bat` de l'installation Windows).
 
 > Une sauvegarde qui reste sur la même machine ne protège pas d'une panne de disque : en télécharger une régulièrement, ou faire pointer `BACKUP_PATH` vers un dossier OneDrive / Google Drive.
 
@@ -131,12 +131,13 @@ Après chaque mise à jour du code : `git pull`, `composer install --no-dev`, `n
 
 ### A. Sur l'ordinateur du bureau (Windows, gratuit)
 
-Utilisation depuis ce seul ordinateur (ou le réseau local).
+Utilisation depuis ce seul ordinateur, comme une application de bureau : une icône, une fenêtre Edge sans barre d'adresse, et rien d'autre à installer (pas de XAMPP, Composer, Node ni Git).
 
-1. Installer PHP 8.2+ (extensions `pdo_sqlite`, `mbstring`, `gd`, `zip`, `fileinfo`, `intl`) et Composer, puis faire l'installation ci-dessus.
-2. Lancer l'application à l'ouverture de session : Planificateur de tâches Windows › Créer une tâche › Déclencheur « À l'ouverture de session » › Action : programme `php`, arguments `artisan serve --port=8000`, « Commencer dans » : le dossier de l'application.
-3. Sauvegarde : seconde tâche, déclencheur quotidien (ex. 13 h, « Exécuter dès que possible si une exécution a été manquée »), action `php artisan backup:run`. Régler `BACKUP_PATH` vers un dossier OneDrive ou Google Drive.
-4. Mettre un raccourci vers `http://localhost:8000` sur le bureau.
+```powershell
+powershell -ExecutionPolicy Bypass -File deploy\build-package.ps1 -Zip   # crée dist\JYSolutions\
+```
+
+Le paquet contient le code avec `vendor` sans les dépendances de développement, `public/build`, `.env.production` et les scripts Windows (`install.bat`, `JY Solutions.vbs`, `stop.bat`, `backup.bat`, `install-backup-task.bat`, `update.bat`). On y ajoute PHP 8.4 NTS x64 portable dans `php\`. Toutes les étapes sont dans **[deploy/INSTALL-PC-PAPA.md](deploy/INSTALL-PC-PAPA.md)**.
 
 ### B. Serveur VPS (Ubuntu 24.04, Nginx, PHP-FPM)
 

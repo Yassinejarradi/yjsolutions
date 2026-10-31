@@ -38,10 +38,14 @@ return [
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
+            // Attend jusqu'à 10 s qu'une autre écriture se termine au lieu d'échouer (« database is locked »).
+            'busy_timeout' => (int) env('DB_BUSY_TIMEOUT', 10000),
             'journal_mode' => null,
             'synchronous' => null,
-            'transaction_mode' => 'DEFERRED',
+            // IMMEDIATE : une transaction prend le verrou d'écriture dès le début. Sur SQLite, lockForUpdate()
+            // ne fait rien ; c'est ce mode qui sérialise l'attribution des numéros (lecture puis écriture).
+            // Laravel ne l'applique qu'à partir de PHP 8.4 : c'est la version de l'installation Windows (deploy/).
+            'transaction_mode' => 'IMMEDIATE',
         ],
 
         'mysql' => [

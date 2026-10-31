@@ -72,6 +72,31 @@ test('seules les sauvegardes les plus récentes sont gardées', function () {
     ]);
 });
 
+test('backup:run --to --keep sauvegarde ailleurs, avec storage/app/public, et garde les plus récentes', function () {
+    $elsewhere = storage_path('framework/testing/ailleurs-'.uniqid());
+    $public = storage_path('app/public/test-sauvegarde-'.uniqid().'.txt');
+    File::put($public, 'public');
+
+    try {
+        foreach (['2026-10-01 12:00', '2026-10-02 12:00', '2026-10-03 12:00'] as $moment) {
+            Carbon::setTestNow($moment);
+            $this->artisan('backup:run', ['--to' => $elsewhere.DIRECTORY_SEPARATOR, '--keep' => 2])->assertSuccessful();
+        }
+
+        $files = collect(File::files($elsewhere))->map->getFilename()->sort()->values()->all();
+        expect($files)->toBe(['sauvegarde-2026-10-02-120000.zip', 'sauvegarde-2026-10-03-120000.zip'])
+            ->and(File::isDirectory($this->backupDir))->toBeFalse(); // dossier par défaut inchangé
+
+        $zip = new ZipArchive;
+        $zip->open($elsewhere.'/sauvegarde-2026-10-03-120000.zip');
+        expect($zip->getFromName('public/'.basename($public)))->toBe('public');
+        $zip->close();
+    } finally {
+        File::delete($public);
+        File::deleteDirectory($elsewhere);
+    }
+});
+
 test('la sauvegarde est planifiée chaque jour', function () {
     $event = collect(app(Schedule::class)->events())
         ->first(fn ($event) => str_contains($event->command, 'backup:run'));

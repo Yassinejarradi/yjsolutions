@@ -11,7 +11,7 @@ use ZipArchive;
 /**
  * Sauvegarde complète dans un seul fichier .zip :
  * - la base (copie du fichier SQLite, ou export SQL pour MySQL, sans besoin de mysqldump) ;
- * - les fichiers téléversés (logos), dossier storage/app/private ;
+ * - les fichiers téléversés (logos) de storage/app/private, et storage/app/public ;
  * - un LISEZMOI.txt qui explique la restauration.
  */
 class Backup
@@ -49,16 +49,8 @@ class Backup
             $databaseFile = self::dumpDatabase($temp);
             $zip->addFile($databaseFile, basename($databaseFile));
 
-            $files = storage_path('app/private');
-            if (File::isDirectory($files)) {
-                foreach (File::allFiles($files) as $file) {
-                    // Envois en cours de Livewire : temporaires, inutiles à restaurer.
-                    if (str_starts_with(str_replace('\\', '/', $file->getRelativePathname()), 'livewire-tmp/')) {
-                        continue;
-                    }
-                    $zip->addFile($file->getPathname(), 'fichiers/'.str_replace('\\', '/', $file->getRelativePathname()));
-                }
-            }
+            self::addFolder($zip, storage_path('app/private'), 'fichiers/');
+            self::addFolder($zip, storage_path('app/public'), 'public/');
 
             $zip->addFromString('LISEZMOI.txt', self::readme(basename($databaseFile)));
             $zip->close();
@@ -69,6 +61,21 @@ class Backup
         self::prune();
 
         return $zipPath;
+    }
+
+    /** Ajoute un dossier au zip, sans les envois en cours de Livewire (temporaires, inutiles à restaurer). */
+    private static function addFolder(ZipArchive $zip, string $folder, string $prefix): void
+    {
+        if (! File::isDirectory($folder)) {
+            return;
+        }
+
+        foreach (File::allFiles($folder) as $file) {
+            $relative = str_replace('\\', '/', $file->getRelativePathname());
+            if (! str_starts_with($relative, 'livewire-tmp/')) {
+                $zip->addFile($file->getPathname(), $prefix.$relative);
+            }
+        }
     }
 
     /**
@@ -171,7 +178,8 @@ class Backup
             ."Pour restaurer :\r\n"
             ."1. Arrêter l'application.\r\n"
             ."2. {$restore}\r\n"
-            ."3. Copier le contenu du dossier « fichiers » dans storage/app/private (logos).\r\n"
+            ."3. Copier le contenu du dossier « fichiers » dans storage/app/private (logos),\r\n"
+            ."   et celui du dossier « public » (s'il existe) dans storage/app/public.\r\n"
             ."4. Relancer l'application.\r\n";
     }
 }
